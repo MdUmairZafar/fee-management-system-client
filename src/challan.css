@@ -14,11 +14,13 @@
   background-color: white; /* Example color */
   height: 100vh; /* Full height */
   display: flex;
-  justify-content: center;
+  /* justify-content: center; */
+
   align-items: center;
   color: #333;
 }
 .search-feild {
+  padding: 50px;
 }
 .top-buttons {
   display: flex;
