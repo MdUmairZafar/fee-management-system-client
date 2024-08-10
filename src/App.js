@@ -6,6 +6,7 @@ import "./App.css";
 // import "./challan.css";
 import Table from "./table";
 import Challan from "./challan";
+import User from "./user";
 
 function App() {
   return (
@@ -14,7 +15,7 @@ function App() {
         <Table />
       </div>
       <div className="main-content">
-        <Challan />
+        <User />
       </div>
     </div>
   );

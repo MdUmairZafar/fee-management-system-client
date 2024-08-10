@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import "./challan.css"; // Import the CSS file for styling
 
 const Challan = () => {
-  const [selectedDate, setSelectedDate] = useState("");
+  const [date1, setDate1] = useState("");
+  const [date2, setDate2] = useState("");
 
-  const handleDateChange = (e) => {
-    setSelectedDate(e.target.value);
+  const handleDateChange = (e, setDate) => {
+    setDate(e.target.value);
   };
 
   return (
@@ -24,11 +25,21 @@ const Challan = () => {
           <div className="top-buttons">
             <button className="action-button">Pending</button>
             <button className="action-button">Done</button>
+
+            <button className="action-button">Generate Challan</button>
+            <button className="action-button">Edit Challan Values</button>
             <div className="date-picker">
               <input
                 type="date"
-                value={selectedDate}
-                onChange={handleDateChange}
+                value={date1}
+                onChange={(e) => handleDateChange(e, setDate1)}
+              />
+            </div>
+            <div className="date-picker">
+              <input
+                type="date"
+                value={date2}
+                onChange={(e) => handleDateChange(e, setDate2)}
               />
             </div>
           </div>
@@ -160,10 +171,6 @@ const Challan = () => {
           </table>
 
           {/* Buttons on the Right Side */}
-          <div className="side-buttons">
-            <button className="action-button">Generate Challan</button>
-            <button className="action-button">Edit Challan Values</button>
-          </div>
         </div>
       </div>
     </div>
