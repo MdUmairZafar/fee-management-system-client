@@ -1,23 +1,14 @@
-// src/App.js
-
 import React from "react";
-import "./App.css";
-// import "./table.css";
-// import "./challan.css";
-import Table from "./table";
-import Challan from "./challan";
+import { AuthProvider } from "./AuthContext"; // Use named import for AuthProvider
+import LoginPage from "./login";
 import User from "./user";
 
 function App() {
   return (
-    <div className="App">
-      <div className="sidebar">
-        <Table />
-      </div>
-      <div className="main-content">
-        <User />
-      </div>
-    </div>
+    <AuthProvider>
+      <LoginPage />
+      {/* <User /> */}
+    </AuthProvider>
   );
 }
 

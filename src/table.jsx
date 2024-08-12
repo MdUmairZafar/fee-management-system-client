@@ -1,10 +1,11 @@
 import "./table.css";
+import logo from "../src/Screenshot_2024-07-24-20-10-02-365_com.miui.videoplayer.png";
 const Table = () => {
   return (
     <div className="sidebar">
       {/* Logo */}
       <div className="logo">
-        <img src="https://via.placeholder.com/100" alt="Logo" />
+        <img src={logo} alt="Logo" />
       </div>
       <div className="empty-field">
         <p>username</p>
