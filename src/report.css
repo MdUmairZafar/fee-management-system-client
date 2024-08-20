@@ -1,0 +1,50 @@
+.table-container {
+    height: 500px; /* Set the height you want */
+    overflow-y: scroll; /* Enable scrolling */
+  }
+  
+  .data-table {
+    width: 80%;
+    border-collapse: collapse;
+  }
+  
+  .data-table th,
+  .data-table td {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
+  
+  .data-table tfoot {
+    background-color: #f0f0f0; /* Optional: background color for the footer */
+    font-weight: bold; /* Make the footer text bold */
+  }
+  
+  .data-table tfoot td {
+    border-top: 2px solid #000; /* Optional: thicker top border for separation */
+  }
+  
+  .main-content {
+    width: 80%;
+    padding: 20px;
+  }
+  
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .btn {
+    padding: 10px;
+    background-color: #cccccc;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  
+  .date-picker {
+    padding: 10px;
+    border: 1px solid #cccccc;
+  }
+  

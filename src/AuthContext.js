@@ -1,4 +1,4 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useState, useEffect } from "react";
 
 // Create the AuthContext
 const AuthContext = createContext();
@@ -8,8 +8,13 @@ const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
 
-  // Logic to manage token and user state can be added here
-  // For example, setting token from localStorage or making an API call
+  useEffect(() => {
+    const savedToken = localStorage.getItem("token");
+    if (savedToken) {
+      setToken(savedToken);
+      // Optionally, retrieve user info from the backend using the token
+    }
+  }, []);
 
   return (
     <AuthContext.Provider value={{ token, setToken, user, setUser }}>
