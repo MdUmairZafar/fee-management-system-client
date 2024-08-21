@@ -3,6 +3,7 @@ import { AuthProvider } from "./AuthContext"; // Use named import for AuthProvid
 import LoginPage from "./login";
 import User from "./user";
 import Report from "./Report";
+import Table from "./table";
 
 function App() {
   return (
@@ -10,7 +11,10 @@ function App() {
     //   <report/>
     //   {/* <User /> */}
     // </AuthProvider>
-    <Report/>
+    <div>
+      <Table/>
+      <Report/>
+    </div>
   );
 }
 
