@@ -47,6 +47,7 @@ const Report = () => {
       <div className="table-wrapper">
         <table className="data-table">
           <thead>
+            
             <tr>
               <th>Serial No</th>
               <th>Name</th>
@@ -75,6 +76,9 @@ const Report = () => {
               <th>2nd Shift</th>
               <th>Fine Funds</th>
               <th>Grand Total</th>
+              <th>Status</th>
+              <th>Due Date</th>
+              <th>User Name</th>
             </tr>
           </thead>
           <tbody>
