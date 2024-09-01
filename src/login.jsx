@@ -37,7 +37,7 @@ const LoginPage = () => {
       setupAxiosInterceptors(token);
 
       // Redirect to the main page (e.g., /users)
-      navigate("/users");
+      navigate(`/user/${user.id}`);
     } catch (error) {
       console.error("Login failed:", error);
       // Display an error message to the user
