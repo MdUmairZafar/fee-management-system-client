@@ -1,5 +1,7 @@
-import React, { useState } from "react";
-import "./challan.css"; // Import the CSS file for styling
+import React, { useEffect, useState } from "react";
+import "./challan.css";
+import axiosInstance from "./axiosConfig.js";
+import ChallanModal from "./challanModal.jsx";
 
 const Challan = () => {
   const [date1, setDate1] = useState("");
@@ -25,9 +27,8 @@ const Challan = () => {
           <div className="top-buttons">
             <button className="action-button">Pending</button>
             <button className="action-button">Done</button>
-
-            <button className="action-button">Generate Challan</button>
-            <button className="action-button">Edit Challan Values</button>
+            <ChallanModal buttonName={"Generate Challan"} />{" "}
+            <ChallanModal buttonName={"Edit Challan"} />{" "}
             <div className="date-picker">
               <input
                 type="date"
