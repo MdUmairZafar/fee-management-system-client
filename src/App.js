@@ -10,13 +10,15 @@ import Layout from "./UserLayout";
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<LoginPage />} />
-          <Route path="/user/:id" element={<Layout />} />
+      {/* <Router>
+        <Routes> */}
+          {/* <Route path="/" element={<LoginPage />} /> */}
+          {/* <Route path="/" element={<Layout />} /> */}
+          
           {/* Add other routes here */}
-        </Routes>
-      </Router>
+          <Layout/>
+        {/* </Routes>
+      </Router> */}
     </AuthProvider>
   );
 }

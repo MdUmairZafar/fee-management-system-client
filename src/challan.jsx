@@ -1,31 +1,66 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "./challan.css"; // Import the CSS file for styling
+import axiosInstance, { setupAxiosInterceptors } from "./axiosConfig";
+import { AuthContext } from "./AuthContext";
 
 const Challan = () => {
+  const { token } = useContext(AuthContext); // Retrieve token from context
+  const [challanData, setChallanData] = useState([]); // State for fetched challan data
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [date1, setDate1] = useState("");
   const [date2, setDate2] = useState("");
 
+  // Setup Axios interceptors to include the token in requests
+  useEffect(() => {
+    if (token) {
+      setupAxiosInterceptors(token); // Configure Axios with token if available
+    }
+  }, [token]);
+
+  // Fetch challan data from the backend
+  useEffect(() => {
+    const fetchChallanData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await axiosInstance.get("/challan"); // Replace with your actual API endpoint
+        console.log("Fetched Challan Data:", response.data); // Inspect the data structure
+        setChallanData(response.data.challans || []); // Adjust based on the actual response structure
+      } catch (error) {
+        console.error("Error fetching challan data:", error);
+        setError("Failed to fetch challan data. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (token) {
+      fetchChallanData();
+    }
+  }, [token]); // Fetch data when the token is available
+
+  // Handle date changes
   const handleDateChange = (e, setDate) => {
     setDate(e.target.value);
   };
 
+  // Display loading or error states
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p className="error-message">{error}</p>;
+
+  // Render the challan table with fetched data
   return (
     <div className="challan-container">
       <div className="table-container">
         {/* Search Field and Buttons Above the Table */}
         <div className="top-bar">
           <div className="search-field">
-            <input
-              type="search"
-              name="search-field"
-              id=""
-              placeholder="Search..."
-            />
+            <input type="search" name="search-field" placeholder="Search..." />
           </div>
           <div className="top-buttons">
             <button className="action-button">Pending</button>
             <button className="action-button">Done</button>
-
             <button className="action-button">Generate Challan</button>
             <button className="action-button">Edit Challan Values</button>
             <div className="date-picker">
@@ -80,97 +115,45 @@ const Challan = () => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>1</td>
-                <td>John Doe</td>
-                <td>12/01/2000</td>
-                <td>12345</td>
-                <td>10th Grade</td>
-                <td>01/08/2023</td>
-                <td>$200</td>
-                <td>$300</td>
-                <td>$50</td>
-                <td>$15</td>
-                <td>$10</td>
-                <td>$30</td>
-                <td>$25</td>
-                <td>$5</td>
-                <td>$10</td>
-                <td>$8</td>
-                <td>$100</td>
-                <td>$20</td>
-                <td>$12</td>
-                <td>$10</td>
-                <td>$40</td>
-                <td>$5</td>
-                <td>$30</td>
-                <td>$20</td>
-                <td>$60</td>
-                <td>$10</td>
-                <td>$985</td>
-              </tr>
-              <tr>
-                <td>2</td>
-                <td>Jane Smith</td>
-                <td>05/02/1998</td>
-                <td>67890</td>
-                <td>11th Grade</td>
-                <td>01/08/2023</td>
-                <td>$250</td>
-                <td>$350</td>
-                <td>$60</td>
-                <td>$20</td>
-                <td>$12</td>
-                <td>$35</td>
-                <td>$28</td>
-                <td>$6</td>
-                <td>$12</td>
-                <td>$10</td>
-                <td>$110</td>
-                <td>$22</td>
-                <td>$15</td>
-                <td>$12</td>
-                <td>$45</td>
-                <td>$6</td>
-                <td>$35</td>
-                <td>$22</td>
-                <td>$65</td>
-                <td>$12</td>
-                <td>$1110</td>
-              </tr>
-              <tr>
-                <td>3</td>
-                <td>Mike Johnson</td>
-                <td>03/03/1997</td>
-                <td>54321</td>
-                <td>12th Grade</td>
-                <td>01/08/2023</td>
-                <td>$220</td>
-                <td>$320</td>
-                <td>$55</td>
-                <td>$18</td>
-                <td>$11</td>
-                <td>$32</td>
-                <td>$27</td>
-                <td>$7</td>
-                <td>$11</td>
-                <td>$9</td>
-                <td>$105</td>
-                <td>$21</td>
-                <td>$14</td>
-                <td>$11</td>
-                <td>$42</td>
-                <td>$6</td>
-                <td>$32</td>
-                <td>$21</td>
-                <td>$62</td>
-                <td>$11</td>
-                <td>$1045</td>
-              </tr>
+              {Array.isArray(challanData) && challanData.length > 0 ? (
+                challanData.map((challan, index) => (
+                  <tr key={challan._id}>
+                    <td>{index + 1}</td>
+                    <td>{challan.name}</td>
+                    <td>{challan.dob || "N/A"}</td>
+                    <td>{challan.rollNo || "N/A"}</td>
+                    <td>{challan.class || "N/A"}</td>
+                    <td>{challan.dated || "N/A"}</td>
+                    <td>{challan.admissionFee || "N/A"}</td>
+                    <td>{challan.tuitionFee || "N/A"}</td>
+                    <td>{challan.generalFund || "N/A"}</td>
+                    <td>{challan.studentIDCardFund || "N/A"}</td>
+                    <td>{challan.redCrossFund || "N/A"}</td>
+                    <td>{challan.medicalFee || "N/A"}</td>
+                    <td>{challan.studentWelfareFund || "N/A"}</td>
+                    <td>{challan.scBreakageFund || "N/A"}</td>
+                    <td>{challan.magazineFund || "N/A"}</td>
+                    <td>{challan.librarySecFund || "N/A"}</td>
+                    <td>{challan.boardUnivRegdExamDues || "N/A"}</td>
+                    <td>{challan.sportsFund || "N/A"}</td>
+                    <td>{challan.miscellaneousFund || "N/A"}</td>
+                    <td>{challan.boardUniProcessingFee || "N/A"}</td>
+                    <td>{challan.transportFund || "N/A"}</td>
+                    <td>{challan.burqaFund || "N/A"}</td>
+                    <td>{challan.collegeExaminationFund || "N/A"}</td>
+                    <td>{challan.computerFee || "N/A"}</td>
+                    <td>{challan.secondShift || "N/A"}</td>
+                    <td>{challan.fineFunds || "N/A"}</td>
+                    <td>{challan.grandTotal || "N/A"}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="27">No challan data available.</td>
+                </tr>
+              )}
             </tbody>
           </table>
-
-          {/* Buttons on the Right Side */}
         </div>
       </div>
     </div>
