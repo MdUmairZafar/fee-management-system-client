@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect, useContext } from "react";
 import "./challan.css"; // Import the CSS file for styling
 import axiosInstance, { setupAxiosInterceptors } from "./axiosConfig";
 import { AuthContext } from "./AuthContext";
+
 
 const Challan = () => {
   const { token } = useContext(AuthContext); // Retrieve token from context
@@ -63,6 +65,7 @@ const Challan = () => {
             <button className="action-button">Done</button>
             <button className="action-button">Generate Challan</button>
             <button className="action-button">Edit Challan Values</button>
+
             <div className="date-picker">
               <input
                 type="date"

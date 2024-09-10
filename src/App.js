@@ -4,8 +4,9 @@ import LoginPage from "./login";
 import User from "./user";
 import Report from "./Report";
 import Table from "./table";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Layout from "./UserLayout";
+import ChallanDataModal from "./challanDataModal";
+import Challan from "./challan";
+import User from "./userModal";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         {/* </Routes>
       </Router> */}
     </AuthProvider>
+
   );
 }
 
