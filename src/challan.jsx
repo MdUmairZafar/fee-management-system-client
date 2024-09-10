@@ -7,11 +7,17 @@ import { AuthContext } from "./AuthContext";
 
 const Challan = () => {
   const { token } = useContext(AuthContext); // Retrieve token from context
-  const [challanData, setChallanData] = useState([]); // State for fetched challan data
+  const [fetchChallanData, setFetchedUserData] = useState([]); // State for fetched challan data
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [date1, setDate1] = useState("");
   const [date2, setDate2] = useState("");
+  const [page, setPage] = useState(1); // State to track current page
+  const [hasMore, setHasMore] = useState(true);
+  const [nameQuery, setNameQuery] = useState(""); // State to track search query for name
+  const [rollNoQuery, setRollNoQuery] = useState(""); 
+  const [searchTerm, setSearchTerm] = useState("");
+  
 
   // Setup Axios interceptors to include the token in requests
   useEffect(() => {
@@ -26,9 +32,17 @@ const Challan = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await axiosInstance.get("/challan"); // Replace with your actual API endpoint
-        console.log("Fetched Challan Data:", response.data); // Inspect the data structure
-        setChallanData(response.data.challans || []); // Adjust based on the actual response structure
+        const response = await axiosInstance.get(
+          `/challan?page=${page}&studentName=${nameQuery}`
+        ); // Update endpoint with search and pagination
+        console.log("Fetched Challan Data:", response.data.data);// Inspect the data structure
+        
+        setFetchedUserData((prevData) =>
+          page === 1 ? response.data.data : [...prevData, ...response.data.data]
+        );
+
+        // Check if there's more data to load
+        setHasMore(response.data.data.length > 0);
       } catch (error) {
         console.error("Error fetching challan data:", error);
         setError("Failed to fetch challan data. Please try again.");
@@ -36,11 +50,51 @@ const Challan = () => {
         setLoading(false);
       }
     };
+    // useEffect(() => {
+    //   if (hasMore && !loading) {
+    //     fetchChallanData();
+    //   }
+    // }, [page]);
+  
 
-    if (token) {
+    // if (token) {
       fetchChallanData();
+    // }
+  }, [page, nameQuery, rollNoQuery]); // Fetch data when the token is available
+
+  // Handle input change for the search field
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // Trigger search on Enter key
+  const handleSearch = () => {
+    setNameQuery(searchTerm); // Update the state to search by name or roll number
+    setRollNoQuery(searchTerm);
+    setPage(1); // Reset page to 1 when performing a new search
+  };
+
+  // Capture Enter key press to trigger search
+  const handleKeyDown = (e) => {
+    
+      handleSearch();
+    
+  };
+
+  const handleScroll = () => {
+    if (
+      window.innerHeight + document.documentElement.scrollTop + 1 >=
+      document.documentElement.scrollHeight
+    ) {
+      if (hasMore && !loading) {
+        setPage((prevPage) => prevPage + 1); // Load the next page
+      }
     }
-  }, [token]); // Fetch data when the token is available
+  };
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Handle date changes
   const handleDateChange = (e, setDate) => {
@@ -58,7 +112,9 @@ const Challan = () => {
         {/* Search Field and Buttons Above the Table */}
         <div className="top-bar">
           <div className="search-field">
-            <input type="search" name="search-field" placeholder="Search..." />
+            <input type="search" name="search-field" placeholder="Search..." value={searchTerm}
+              onChange={handleSearchChange}
+              onKeyDown={handleKeyDown} />
           </div>
           <div className="top-buttons">
             <button className="action-button">Pending</button>
@@ -118,36 +174,36 @@ const Challan = () => {
               </tr>
             </thead>
             <tbody>
-              {Array.isArray(challanData) && challanData.length > 0 ? (
-                challanData.map((challan, index) => (
+              {Array.isArray(fetchChallanData) && fetchChallanData.length > 0 ? (
+                fetchChallanData.map((challan, index) => (
                   <tr key={challan._id}>
                     <td>{index + 1}</td>
                     <td>{challan.name}</td>
-                    <td>{challan.dob || "N/A"}</td>
-                    <td>{challan.rollNo || "N/A"}</td>
-                    <td>{challan.class || "N/A"}</td>
-                    <td>{challan.dated || "N/A"}</td>
-                    <td>{challan.admissionFee || "N/A"}</td>
-                    <td>{challan.tuitionFee || "N/A"}</td>
-                    <td>{challan.generalFund || "N/A"}</td>
-                    <td>{challan.studentIDCardFund || "N/A"}</td>
-                    <td>{challan.redCrossFund || "N/A"}</td>
-                    <td>{challan.medicalFee || "N/A"}</td>
-                    <td>{challan.studentWelfareFund || "N/A"}</td>
-                    <td>{challan.scBreakageFund || "N/A"}</td>
-                    <td>{challan.magazineFund || "N/A"}</td>
-                    <td>{challan.librarySecFund || "N/A"}</td>
-                    <td>{challan.boardUnivRegdExamDues || "N/A"}</td>
-                    <td>{challan.sportsFund || "N/A"}</td>
-                    <td>{challan.miscellaneousFund || "N/A"}</td>
-                    <td>{challan.boardUniProcessingFee || "N/A"}</td>
-                    <td>{challan.transportFund || "N/A"}</td>
-                    <td>{challan.burqaFund || "N/A"}</td>
-                    <td>{challan.collegeExaminationFund || "N/A"}</td>
-                    <td>{challan.computerFee || "N/A"}</td>
-                    <td>{challan.secondShift || "N/A"}</td>
-                    <td>{challan.fineFunds || "N/A"}</td>
-                    <td>{challan.grandTotal || "N/A"}</td>
+                    <td>{challan.dob }</td>
+                    <td>{challan.rollNo }</td>
+                    <td>{challan.class }</td>
+                    <td>{challan.dated }</td>
+                    <td>{challan.admissionFee }</td>
+                    <td>{challan.tuitionFee }</td>
+                    <td>{challan.generalFund }</td>
+                    <td>{challan.studentIDCardFund }</td>
+                    <td>{challan.redCrossFund }</td>
+                    <td>{challan.medicalFee }</td>
+                    <td>{challan.studentWelfareFund }</td>
+                    <td>{challan.scBreakageFund }</td>
+                    <td>{challan.magazineFund }</td>
+                    <td>{challan.librarySecFund }</td>
+                    <td>{challan.boardUnivRegdExamDues }</td>
+                    <td>{challan.sportsFund }</td>
+                    <td>{challan.miscellaneousFund }</td>
+                    <td>{challan.boardUniProcessingFee }</td>
+                    <td>{challan.transportFund }</td>
+                    <td>{challan.burqaFund }</td>
+                    <td>{challan.collegeExaminationFund }</td>
+                    <td>{challan.computerFee }</td>
+                    <td>{challan.secondShift }</td>
+                    <td>{challan.fineFunds }</td>
+                    <td>{challan.grandTotal }</td>
                   </tr>
                 ))
               ) : (

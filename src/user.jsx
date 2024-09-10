@@ -23,15 +23,11 @@ const User = () => {
       setError(null);
       try {
         const response = await axiosInstance.get("/user"); // Replace with your actual API endpoint
-        console.log("API Response:", response.data); // Inspect the data structure
-
+        console.log("API Response:", response.data.data); // Inspect the data structure
+        // console.log(response.data.a)
+        setFetchedUserData(response.data.data);
         // Check if the response data is as expected
-        // if (Array.isArray(response.data.users)) {
-          setFetchedUserData(response.data.users);
-        //  else {
-        //   console.warn("Unexpected data format:", response.data);
-        //   setFetchedUserData([]); // Fallback to empty array if data is not in expected format
-        // }
+       
       } catch (error) {
         console.error("Error fetching user data:", error);
         setError("Failed to fetch user data. Please try again.");
@@ -52,14 +48,14 @@ const User = () => {
   return (
     <div className="challan-container">
       {/* Debugging log to verify data format */}
-      <pre>{JSON.stringify(fetchedUserData, null, 2)}</pre>
+      {/* <pre>{JSON.stringify(fetchedUserData, null, 2)}</pre> */}
 
-      {Array.isArray(fetchedUserData) && fetchedUserData.length > 0 && (
+      {/* {Array.isArray(fetchedUserData) && fetchedUserData.length > 0 && (
         <div className="user-data">
           <h2>Fetched User Data:</h2>
           <pre>{JSON.stringify(fetchedUserData, null, 2)}</pre>
         </div>
-      )}
+      )} */}
 
       <div className="table-container">
         <div className="top-bar"></div>
@@ -74,22 +70,30 @@ const User = () => {
             <tr>
               <th>Serial No</th>
               <th>Name</th>
-              <th>D/O</th>
-              <th>Roll No</th>
-              <th>Class</th>
+              <th>Type</th>
+              <th>Email</th>
+              <th>Phone No</th>
             </tr>
           </thead>
           <tbody>
-            {Array.isArray(fetchedUserData) &&
+            {Array.isArray(fetchedUserData) && fetchedUserData.length > 0 ? (
               fetchedUserData.map((user, index) => (
                 <tr key={user._id}>
                   <td>{index + 1}</td>
                   <td>{user.name}</td>
+                  <td>{user.type}</td>
+                  <td>{user.email}</td>
+                  <td>{user.phone}</td>
                   {/* <td>{user.dob || "N/A"}</td> */}
                   {/* <td>{user.rollNo || "N/A"}</td> */}
                   {/* <td>{user.class || "N/A"}</td> */}
                 </tr>
-              ))}
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5">No data available</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

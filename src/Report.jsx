@@ -5,20 +5,18 @@ import "./report.css";
 const Report = () => {
   const [date1, setDate1] = useState("");
   const [date2, setDate2] = useState("");
-  const [reportData, setReportData] = useState([]);
+  const [fetchData,reportData, setReportData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+
 
   // Fetch data from backend API
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("token"); // Retrieve token from localStorage
-        const response = await axios.get("http://localhost:5000/api/report", {
-          headers: {
-            Authorization: `Bearer ${token}`, // Add token to request headers
-          },
-        });
-        setReportData(response.data); // Set the fetched data to state
+        const response = await axios.get("/challan")
+          
+        setReportData(response.data.data); // Set the fetched data to state
       } catch (error) {
         console.error("Error fetching report data:", error);
       }
@@ -111,8 +109,9 @@ const Report = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredData.map((item, index) => (
-                <tr key={item.id}>
+             {Array.isArray(fetchData) && fetchData.length > 0 ? (
+              fetchData.map((item, index) => (     
+                 <tr key={item.id}>
                   <td>{index + 1}</td>
                   <td>{item.name}</td>
                   <td>{item.dateOfBirth}</td>
@@ -144,7 +143,13 @@ const Report = () => {
                   <td>{item.dueDate}</td>
                   <td>{item.userName}</td>
                 </tr>
-              ))}
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5">No data available</td>
+              </tr>
+            )
+            }
             </tbody>
             <tfoot>
               <tr>

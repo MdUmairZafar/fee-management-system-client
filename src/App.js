@@ -6,7 +6,7 @@ import Report from "./Report";
 import Table from "./table";
 import ChallanDataModal from "./challanDataModal";
 import Challan from "./challan";
-import User from "./userModal";
+import Layout from "./challanLayout";
 
 function App() {
   return (
