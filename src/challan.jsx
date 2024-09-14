@@ -1,30 +1,22 @@
-
 import React, { useState, useEffect, useContext } from "react";
 import "./challan.css"; // Import the CSS file for styling
-import axiosInstance, { setupAxiosInterceptors } from "./axiosConfig";
+import axiosInstance from "./axiosConfig";
 import { AuthContext } from "./AuthContext";
-
 
 const Challan = () => {
   const { token } = useContext(AuthContext); // Retrieve token from context
   const [fetchChallanData, setFetchedUserData] = useState([]); // State for fetched challan data
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [date1, setDate1] = useState("");
-  const [date2, setDate2] = useState("");
+  const [date1, setDate1] = useState(""); // Start date
+  const [date2, setDate2] = useState(""); // End date
   const [page, setPage] = useState(1); // State to track current page
-  const [hasMore, setHasMore] = useState(true);
-  const [nameQuery, setNameQuery] = useState(""); // State to track search query for name
-  const [rollNoQuery, setRollNoQuery] = useState(""); 
-  const [searchTerm, setSearchTerm] = useState("");
-  
-
-  // Setup Axios interceptors to include the token in requests
-  useEffect(() => {
-    if (token) {
-      setupAxiosInterceptors(token); // Configure Axios with token if available
-    }
-  }, [token]);
+  const [totalPages, setTotalPages] = useState(1); // State to track total number of pages
+  const [nameQuery, setNameQuery] = useState(""); // State to track search query
+  const [searchTerm, setSearchTerm] = useState(""); // State for input value
+  const [searchType, setSearchType] = useState("name"); // State to track the selected search type
+  const [selectedRows, setSelectedRows] = useState({}); // State to track selected rows
+  const [paidRows, setPaidRows] = useState({}); // State to track paid status of rows
 
   // Fetch challan data from the backend
   useEffect(() => {
@@ -32,17 +24,18 @@ const Challan = () => {
       setLoading(true);
       setError(null);
       try {
+        // Construct query parameters for search and date range
+        const queryParam =
+          searchType === "name"
+            ? `studentName=${nameQuery}`
+            : `challanNo=${nameQuery}`;
+        const dateRangeParam =
+          date1 && date2 ? `&startDate=${date1}&endDate=${date2}` : "";
         const response = await axiosInstance.get(
-          `/challan?page=${page}&studentName=${nameQuery}`
+          `/challan?page=${page}&${queryParam}${dateRangeParam}&limit=5`
         ); // Update endpoint with search and pagination
-        console.log("Fetched Challan Data:", response.data.data);// Inspect the data structure
-        
-        setFetchedUserData((prevData) =>
-          page === 1 ? response.data.data : [...prevData, ...response.data.data]
-        );
-
-        // Check if there's more data to load
-        setHasMore(response.data.data.length > 0);
+        setFetchedUserData(response.data.data);
+        setTotalPages(response.data.totalPages); // Set total pages from response
       } catch (error) {
         console.error("Error fetching challan data:", error);
         setError("Failed to fetch challan data. Please try again.");
@@ -50,17 +43,9 @@ const Challan = () => {
         setLoading(false);
       }
     };
-    // useEffect(() => {
-    //   if (hasMore && !loading) {
-    //     fetchChallanData();
-    //   }
-    // }, [page]);
-  
 
-    // if (token) {
-      fetchChallanData();
-    // }
-  }, [page, nameQuery, rollNoQuery]); // Fetch data when the token is available
+    fetchChallanData();
+  }, [page, nameQuery, searchType, date1, date2]); // Fetch data when page, search query, search type, or date changes
 
   // Handle input change for the search field
   const handleSearchChange = (e) => {
@@ -69,36 +54,55 @@ const Challan = () => {
 
   // Trigger search on Enter key
   const handleSearch = () => {
-    setNameQuery(searchTerm); // Update the state to search by name or roll number
-    setRollNoQuery(searchTerm);
+    setNameQuery(searchTerm); // Update the state to search by the current term
     setPage(1); // Reset page to 1 when performing a new search
   };
 
   // Capture Enter key press to trigger search
   const handleKeyDown = (e) => {
-    
+    if (e.key === "Enter") {
       handleSearch();
-    
-  };
-
-  const handleScroll = () => {
-    if (
-      window.innerHeight + document.documentElement.scrollTop + 1 >=
-      document.documentElement.scrollHeight
-    ) {
-      if (hasMore && !loading) {
-        setPage((prevPage) => prevPage + 1); // Load the next page
-      }
     }
   };
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   // Handle date changes
   const handleDateChange = (e, setDate) => {
-    setDate(e.target.value);
+    const selectedDate = e.target.value;
+    // Ensure the selected date is in the correct format
+    setDate(selectedDate);
+  };
+
+  // Change page
+  const handlePageChange = (newPage) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setPage(newPage);
+    }
+  };
+
+  // Trigger search by date range
+  const handleDateSearch = () => {
+    if (date1 && date2) {
+      setPage(1); // Reset page to 1 when performing a new date search
+    }
+  };
+
+  // Toggle row selection on double click
+  const handleRowDoubleClick = (id) => {
+    setSelectedRows((prevSelected) => ({
+      ...prevSelected,
+      [id]: !prevSelected[id],
+    }));
+  };
+
+  // Mark selected challans as paid
+  const markChallansAsPaid = () => {
+    const updatedPaidRows = { ...paidRows };
+    Object.keys(selectedRows).forEach((id) => {
+      if (selectedRows[id]) {
+        updatedPaidRows[id] = true;
+      }
+    });
+    setPaidRows(updatedPaidRows);
   };
 
   // Display loading or error states
@@ -112,16 +116,31 @@ const Challan = () => {
         {/* Search Field and Buttons Above the Table */}
         <div className="top-bar">
           <div className="search-field">
-            <input type="search" name="search-field" placeholder="Search..." value={searchTerm}
+            <select
+              value={searchType}
+              onChange={(e) => setSearchType(e.target.value)}
+              className="search-type-dropdown"
+            >
+              <option value="name">Name</option>
+              <option value="challanNo">Challan No</option>
+            </select>
+            <input
+              type="search"
+              name="search-field"
+              placeholder={`Search by ${
+                searchType === "name" ? "Name" : "Challan No"
+              }...`}
+              value={searchTerm}
               onChange={handleSearchChange}
-              onKeyDown={handleKeyDown} />
+              onKeyDown={handleKeyDown}
+            />
           </div>
           <div className="top-buttons">
             <button className="action-button">Pending</button>
             <button className="action-button">Done</button>
             <button className="action-button">Generate Challan</button>
             <button className="action-button">Edit Challan Values</button>
-
+            {/* Date Pickers */}
             <div className="date-picker">
               <input
                 type="date"
@@ -136,6 +155,10 @@ const Challan = () => {
                 onChange={(e) => handleDateChange(e, setDate2)}
               />
             </div>
+            {/* Search by Date Button */}
+            <button className="action-button" onClick={markChallansAsPaid}>
+              Mark Challan as Done
+            </button>
           </div>
         </div>
 
@@ -144,7 +167,7 @@ const Challan = () => {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Serial No</th>
+                <th>Challan No</th>
                 <th>Name</th>
                 <th>D/O</th>
                 <th>Roll No</th>
@@ -171,48 +194,81 @@ const Challan = () => {
                 <th>2nd Shift</th>
                 <th>Fine Funds</th>
                 <th>Grand Total</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {Array.isArray(fetchChallanData) && fetchChallanData.length > 0 ? (
-                fetchChallanData.map((challan, index) => (
-                  <tr key={challan._id}>
-                    <td>{index + 1}</td>
-                    <td>{challan.name}</td>
-                    <td>{challan.dob }</td>
-                    <td>{challan.rollNo }</td>
-                    <td>{challan.class }</td>
-                    <td>{challan.dated }</td>
-                    <td>{challan.admissionFee }</td>
-                    <td>{challan.tuitionFee }</td>
-                    <td>{challan.generalFund }</td>
-                    <td>{challan.studentIDCardFund }</td>
-                    <td>{challan.redCrossFund }</td>
-                    <td>{challan.medicalFee }</td>
-                    <td>{challan.studentWelfareFund }</td>
-                    <td>{challan.scBreakageFund }</td>
-                    <td>{challan.magazineFund }</td>
-                    <td>{challan.librarySecFund }</td>
-                    <td>{challan.boardUnivRegdExamDues }</td>
-                    <td>{challan.sportsFund }</td>
-                    <td>{challan.miscellaneousFund }</td>
-                    <td>{challan.boardUniProcessingFee }</td>
-                    <td>{challan.transportFund }</td>
-                    <td>{challan.burqaFund }</td>
-                    <td>{challan.collegeExaminationFund }</td>
-                    <td>{challan.computerFee }</td>
-                    <td>{challan.secondShift }</td>
-                    <td>{challan.fineFunds }</td>
-                    <td>{challan.grandTotal }</td>
+                fetchChallanData.map((challan) => (
+                  <tr
+                    key={challan._id}
+                    className={
+                      selectedRows[challan._id] ? "selected-row" : ""
+                    }
+                    onDoubleClick={() => handleRowDoubleClick(challan._id)}
+                  >
+                    {/* Challan Data */}
+                    <td>{challan.challanNo}</td>
+                    <td>{challan.studentId.name}</td>
+                    <td>{challan.studentId.fatherName}</td>
+                    <td>{challan.studentId.rollNo}</td>
+                    <td>{challan.studentId.class}</td>
+                    <td>{challan.dated}</td>
+                    <td>{challan.admissionFee}</td>
+                    <td>{challan.tuitionFee}</td>
+                    <td>{challan.generalFund}</td>
+                    <td>{challan.studentIdCardFund}</td>
+                    <td>{challan.redCrossFund}</td>
+                    <td>{challan.medicalFee}</td>
+                    <td>{challan.studentWelfareFund}</td>
+                    <td>{challan.scBreakageFund}</td>
+                    <td>{challan.magazineFund}</td>
+                    <td>{challan.librarySecFund}</td>
+                    <td>{challan.boardUnivRegExamDues}</td>
+                    <td>{challan.sportsFund}</td>
+                    <td>{challan.miscellaneousFund}</td>
+                    <td>{challan.boardUniProcessingFee}</td>
+                    <td>{challan.transportFund}</td>
+                    <td>{challan.burqaFund}</td>
+                    <td>{challan.collegeExaminationFund}</td>
+                    <td>{challan.computerFee}</td>
+                    <td>{challan.secondShift}</td>
+                    <td>{challan.fineFunds}</td>
+                    <td>{challan.grandTotal}</td>
+                    {/* Action Cell */}
+                    <td className="action-cell">
+                      {paidRows[challan._id] ? "Paid" : "Pending"}
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="27">No challan data available.</td>
+                  <td colSpan="29">No data available</td>
                 </tr>
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="pagination">
+          <button
+            className="pagination-button"
+            disabled={page === 1}
+            onClick={() => handlePageChange(page - 1)}
+          >
+            Previous
+          </button>
+          <span className="pagination-info">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            className="pagination-button"
+            disabled={page === totalPages}
+            onClick={() => handlePageChange(page + 1)}
+          >
+            Next
+          </button>
         </div>
       </div>
     </div>

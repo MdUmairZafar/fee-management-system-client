@@ -2,7 +2,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import Table from "./table"; // Import your Sidebar component
 import "./UserLayout.css"; // Import the CSS for layout
-import User from "./user";
+import Report from "./Report";
 
 
 const Layout = () => {
