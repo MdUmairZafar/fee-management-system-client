@@ -213,7 +213,7 @@ const Challan = () => {
                     <td>{challan.studentId.fatherName}</td>
                     <td>{challan.studentId.rollNo}</td>
                     <td>{challan.studentId.class}</td>
-                    <td>{challan.dated}</td>
+                    <td>{new Date(challan.updatedAt).toLocaleDateString()}</td>
                     <td>{challan.admissionFee}</td>
                     <td>{challan.tuitionFee}</td>
                     <td>{challan.generalFund}</td>
