@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext } from "react";
 import "./challan.css"; // Import the CSS file for styling
 import axiosInstance from "./axiosConfig";
 import { AuthContext } from "./AuthContext";
+import ChallanModal from "./challanModal";
+import ChallanDataModal from "./challanDataModal";
 
 const Challan = () => {
   const { token } = useContext(AuthContext); // Retrieve token from context
@@ -137,10 +139,9 @@ const Challan = () => {
           </div>
           <div className="top-buttons">
             <button className="action-button">Pending</button>
-            <button className="action-button">Done</button>
-            <button className="action-button">Generate Challan</button>
-            <button className="action-button">Edit Challan Values</button>
-            {/* Date Pickers */}
+            <ChallanDataModal buttonName={"Edit Default Values"} />
+            <ChallanModal buttonName={"Generate Challan"} />{" "}
+            <ChallanModal buttonName={"Edit Challan"} /> {/* Date Pickers */}
             <div className="date-picker">
               <input
                 type="date"
@@ -198,13 +199,12 @@ const Challan = () => {
               </tr>
             </thead>
             <tbody>
-              {Array.isArray(fetchChallanData) && fetchChallanData.length > 0 ? (
+              {Array.isArray(fetchChallanData) &&
+              fetchChallanData.length > 0 ? (
                 fetchChallanData.map((challan) => (
                   <tr
                     key={challan._id}
-                    className={
-                      selectedRows[challan._id] ? "selected-row" : ""
-                    }
+                    className={selectedRows[challan._id] ? "selected-row" : ""}
                     onDoubleClick={() => handleRowDoubleClick(challan._id)}
                   >
                     {/* Challan Data */}

@@ -101,7 +101,7 @@ const validationSchema = Yup.object().shape({
     .nullable(),
 });
 
-const ChallanDataModal = () => {
+const ChallanDataModal = ({ buttonName }) => {
   const [open, setOpen] = useState(false);
   const [initialValues, setInitialValues] = useState({});
 
@@ -141,9 +141,9 @@ const ChallanDataModal = () => {
 
   return (
     <div>
-      <Button variant="contained" onClick={handleOpen}>
-        Open Modal
-      </Button>
+      <button className="action-button" onClick={handleOpen}>
+        {buttonName}
+      </button>
       <Modal open={open} onClose={handleClose}>
         <Box sx={style}>
           <Formik
