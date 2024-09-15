@@ -6,18 +6,22 @@ import Report from "./Report";
 import Table from "./table";
 import ChallanDataModal from "./challanDataModal";
 import Challan from "./challan";
-import UserModal from "./userModal";
+import Layout from "./reportLayout";
 
 function App() {
   return (
-    // <AuthProvider>
-    //   <report/>
-    //   {/* <User /> */}
-    // </AuthProvider>
-    <div>
-      <Table />
-      <UserModal buttonName={"Create User"} />
-    </div>
+    <AuthProvider>
+      {/* <Router>
+        <Routes> */}
+          {/* <Route path="/" element={<LoginPage />} /> */}
+          {/* <Route path="/" element={<Layout />} /> */}
+          
+          {/* Add other routes here */}
+          <Layout/>
+        {/* </Routes>
+      </Router> */}
+    </AuthProvider>
+
   );
 }
 

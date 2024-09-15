@@ -1,9 +1,11 @@
 /* src/challan.css */
+
 body {
   overflow-x: hidden;
   margin-left: 250px; /* Offset the content by the sidebar width */
   padding: 20px;
 }
+
 .challan-container {
   padding: 20px;
   background-color: #f4f4f9;
@@ -83,15 +85,18 @@ body {
   min-width: 1600px; /* Ensure a minimum width for the table */
   border-collapse: collapse;
   background-color: white;
-  overflow: hidden;
 }
 
 .data-table th,
 .data-table td {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 5px; /* Increased padding for larger cells */
   text-align: left;
-  white-space: nowrap; /* Prevent text wrapping */
+  min-width: 200px; /* Increased minimum width for each cell */
+  word-wrap: break-word; /* Ensures long words break */
+  overflow-wrap: break-word; /* Handles word wrapping */
+  vertical-align: top; /* Ensures content is aligned to the top */
+  box-sizing: border-box; /* Includes padding in height calculations */
 }
 
 .data-table th {
@@ -99,16 +104,36 @@ body {
   font-weight: bold;
 }
 
-.side-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-left: 20px;
-  position: absolute;
-  right: -2550px; /* Adjust this value for button positioning */
-  top: 0;
+.selected-row {
+  background-color: #e0f7fa; /* Light blue background for selected rows */
 }
 
-.side-buttons .action-button {
-  width: 180px; /* Button width for consistency */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background-color: #3498db;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin: 0 5px;
+}
+
+.pagination-button:hover {
+  background-color: #2980b9;
+}
+
+.pagination-button.active {
+  background-color: #2980b9;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
 }
