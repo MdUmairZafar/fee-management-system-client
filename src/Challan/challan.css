@@ -104,9 +104,6 @@ body {
   font-weight: bold;
 }
 
-.selected-row {
-  background-color: #e0f7fa; /* Light blue background for selected rows */
-}
 
 .pagination {
   display: flex;

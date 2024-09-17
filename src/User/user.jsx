@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
-import "./challan.css"; // Import the CSS file for styling
-import { AuthContext } from "./AuthContext";
-import axiosInstance, { setupAxiosInterceptors } from "./axiosConfig";
+import "./user.css"; // Import the CSS file for styling
+import { AuthContext } from "../AuthContext";
+import axiosInstance, { setupAxiosInterceptors } from "../axiosConfig";
 
 const User = () => {
   // const { user, token } = useContext(AuthContext);

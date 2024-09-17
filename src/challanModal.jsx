@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Box, Button, Modal, TextField, Grid } from "@mui/material";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import "./challan.css";
+import "./Challan/challan.css";
 import axiosInstance from "./axiosConfig";
 
 const style = {

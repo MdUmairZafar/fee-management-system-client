@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import "./report.css"; // Import the CSS file for styling
-import axiosInstance from "./axiosConfig";
-import { AuthContext } from "./AuthContext";
+import axiosInstance from "../axiosConfig";
+import { AuthContext } from "../AuthContext";
 
 const Challan = () => {
   const { token } = useContext(AuthContext); // Retrieve token from context
