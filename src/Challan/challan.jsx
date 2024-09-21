@@ -18,7 +18,9 @@ const Challan = () => {
   const [searchTerm, setSearchTerm] = useState(""); // State for input value
   const [searchType, setSearchType] = useState("name"); // State to track the selected search type
   const [selectedRows, setSelectedRows] = useState({}); // State to track selected rows
+  const [selectedRowData, setSelectedRowData] = useState(null); // State to store selected row data
   const [trigger, setTrigger] = useState(false); // State to trigger re-fetching data
+  const [modalOpen, setModalOpen] = useState(false);
 
   // Fetch challan data from the backend
   useEffect(() => {
@@ -53,11 +55,34 @@ const Challan = () => {
     };
 
     fetchChallanData();
-  }, [page, nameQuery, searchType, date1, date2, trigger]); // Fetch data when page, search query, search type, or date changes
+  }, [
+    page,
+    nameQuery,
+    searchType,
+    date1,
+    date2,
+    trigger,
+    selectedRowData,
+    modalOpen,
+  ]); // Fetch data when page, search query, search type, or date changes
+
+  // Reset states when modalOpen changes
+  useEffect(() => {
+    resetStates();
+  }, [modalOpen]);
+
+  const resetStates = () => {
+    setSelectedRows({});
+    setSelectedRowData(null);
+  };
 
   // Handle input change for the search field
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
+  };
+
+  const handleModalClose = () => {
+    setModalOpen(!modalOpen); // This will trigger a re-render
   };
 
   // Trigger search on Enter key or button click
@@ -88,6 +113,15 @@ const Challan = () => {
     setSelectedRows((prevSelected) => ({
       [data._id]: !prevSelected[data._id],
     }));
+    if (selectedRows[data._id]) {
+      console.log("in IF part: ", selectedRows[data._id]);
+      setSelectedRowData(null);
+    } else {
+      console.log("in elsex part: ", selectedRows[data._id]);
+      setSelectedRowData(data);
+    }
+
+    console.log("Selected Rows:", selectedRowData);
   };
 
   // Handle date changes
@@ -102,19 +136,9 @@ const Challan = () => {
       setPage(newPage);
     }
   };
-  // Get the value of the selected row
-  const getSelectedRowData = () => {
-    const selectedId = Object.keys(selectedRows)[0]; // Extract the selected ID (since only one row is selected)
-    const selectedRowData = fetchChallanData.find(
-      (challan) => challan._id === selectedId
-    ); // Find the corresponding row data
-    return selectedRowData;
-  };
 
   // Use it in your function (e.g., when marking a challan as paid)
   const markChallansAsPaid = async () => {
-    const selectedRowData = getSelectedRowData();
-
     if (selectedRowData) {
       console.log("Selected Row Data:", selectedRowData);
       // updating status in backend
@@ -133,6 +157,18 @@ const Challan = () => {
     } else {
       console.log("No row selected");
     }
+  };
+
+  const getTransformedValues = (selectedRowData) => {
+    const { studentId, ...rest } = selectedRowData;
+    return {
+      ...rest,
+      studentName: studentId.name,
+      grade: studentId.class,
+      rollNo: studentId.rollNo,
+      fatherName: studentId.fatherName,
+      studentId: studentId._id,
+    };
   };
 
   // Display loading or error states
@@ -166,9 +202,20 @@ const Challan = () => {
           </div>
           <div className="top-buttons">
             <ChallanDataModal buttonName={"Edit Default Values"} />
-            <ChallanModal buttonName={"Generate Challan"} />
-            <ChallanModal buttonName={"Edit Challan"} />
-
+            <ChallanModal
+              buttonName={"Generate Challan"}
+              close={handleModalClose}
+            />
+            {selectedRowData ? (
+              <ChallanModal
+                buttonName={"Edit Challan"}
+                close={handleModalClose}
+                isDisable={false}
+                values={getTransformedValues(selectedRowData)}
+              />
+            ) : (
+              <ChallanModal buttonName={"Edit Challan"} isDisable={true} />
+            )}
             {/* From Date Picker */}
             <div className="date-picker">
               <label>From:</label>
@@ -246,7 +293,7 @@ const Challan = () => {
                     <td>{challan.studentId.fatherName}</td>
                     <td>{challan.studentId.rollNo}</td>
                     <td>{challan.studentId.class}</td>
-                    <td>{new Date(challan.updatedAt).toLocaleDateString()}</td>
+                    <td>{new Date(challan.createdAt).toLocaleDateString()}</td>
                     <td>{challan.admissionFee}</td>
                     <td>{challan.tuitionFee}</td>
                     <td>{challan.generalFund}</td>
