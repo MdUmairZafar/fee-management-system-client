@@ -3,6 +3,7 @@ import Table from "../table"; // Import your Sidebar component
 import "../UserLayout.css"; // Import the CSS for layout
 import Report from "./Report";
 import Challan from "../Challan/challan";
+import ChallanModal from "../challanModal";
 
 const Layout = () => {
   return (

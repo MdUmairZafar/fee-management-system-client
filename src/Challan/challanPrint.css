@@ -1,0 +1,92 @@
+/* General Challan Styles */
+
+.print-challan-div {
+  display: none;
+}
+
+.challan-box {
+  padding: 5px;
+  border: 1px solid black;
+  width: 100%;
+  max-width: 550px; /* Reduced width to fit three challans on one A4 page */
+  font-size: 8px; /* Reduced font size to fit more content */
+  margin: 0 auto;
+  margin-bottom: 10px;
+}
+
+.challan-header {
+  text-align: center;
+  font-size: 12px; /* Slightly smaller heading */
+}
+
+.challan-subheader {
+  text-align: center;
+  font-size: 10px;
+}
+
+.challan-info {
+  text-align: center;
+  font-size: 8px;
+}
+
+.challan-label {
+  margin: 5px 0;
+}
+
+.challan-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8px; /* Adjusted to keep it compact */
+}
+
+.challan-table th,
+.challan-table td {
+  border: 1px solid black;
+  padding: 3px; /* Reduced padding */
+}
+
+.challan-footer {
+  margin-top: 5px;
+}
+
+.challan-footer p {
+  text-align: right;
+  margin-top: 5px;
+}
+
+/* Print-specific Styles */
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  .print-challan-div {
+    display: block;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  @page {
+    size: A4 landscape; /* You can switch to landscape if needed */
+    margin: 10mm;
+  }
+
+  div {
+    page-break-inside: avoid; /* Avoids breaking inside the component */
+  }
+
+  table,
+  th,
+  td {
+    border: 1px solid black !important;
+    padding: 3px !important; /* Keeps padding minimal */
+  }
+
+  /* This ensures that all challan copies are compact and fit on the same page */
+  .challan-container {
+    page-break-before: auto;
+    page-break-after: auto;
+    page-break-inside: avoid;
+  }
+}
