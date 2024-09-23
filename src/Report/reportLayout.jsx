@@ -10,7 +10,7 @@ const Layout = () => {
     <div className="layout-container">
       <Table />
       <div className="main-content">
-        <Challan />{" "}
+        <Report />{" "}
         {/* This is where the route-specific components will be rendered */}
       </div>
     </div>
