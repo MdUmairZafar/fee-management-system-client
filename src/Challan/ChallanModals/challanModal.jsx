@@ -1,8 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Box, Button, Modal, TextField, Grid } from "@mui/material";
-import { Formik, Form, Field, ErrorMessage, getIn } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import axiosInstance from "./axiosConfig";
+import "../challan.css";
+import axiosInstance from "../../Utils/axiosConfig";
+import { useReactToPrint } from "react-to-print";
+import ChallanComponent from "../ChallanPrint/challanPrint";
+import "../ChallanPrint/challanPrint.css";
 
 const style = {
   position: "absolute",
@@ -19,6 +23,10 @@ const style = {
 };
 
 const validationSchema = Yup.object().shape({
+  rollNo: Yup.string().required("Roll No. is required"),
+  studentName: Yup.string().required("Student Name is required"),
+  fatherName: Yup.string().required("Father Name is required"),
+  grade: Yup.string().required("Class is required"),
   admissionFee: Yup.number()
     .typeError("Admission Fee must be a number")
     .min(0, "Admission Fee must be a positive number")
@@ -101,13 +109,31 @@ const validationSchema = Yup.object().shape({
     .nullable(),
 });
 
-const ChallanDataModal = ({ buttonName }) => {
+const ChallanModal = ({
+  values = {
+    rollNo: "",
+    studentName: "",
+    fatherName: "",
+    grade: "",
+    tuitionFee: "",
+  },
+  buttonName,
+  isDisable,
+  close,
+}) => {
   const [open, setOpen] = useState(false);
-  const [initialValues, setInitialValues] = useState({});
+  const [initialValues, setInitialValues] = useState(values);
+  const [student, setStudent] = useState(null);
+  // to shift focus to these fields based case of student data
+  const studentNameRef = useRef(null);
+  const admissionFeeRef = useRef(null);
+  const componentRef = useRef();
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  });
 
+  // to get default values when generating the challan
   const getInitialValues = async () => {
     try {
       const response = await axiosInstance.get("/challan/data");
@@ -117,33 +143,168 @@ const ChallanDataModal = ({ buttonName }) => {
     }
   };
 
-  const updateValues = async (values) => {
+  const getDateThreeDaysAhead = () => {
+    const today = new Date();
+    const futureDate = new Date(today);
+    futureDate.setDate(today.getDate() + 3);
+
+    return futureDate.toISOString().split("T")[0]; // For 'YYYY-MM-DD' format
+  };
+
+  const modifyValues = (values, studentId, userId) => {
+    // Create a new object to hold the updated values
+    const newValues = {
+      ...values, // Spread the existing values
+    };
+
+    // Remove specific values
+    delete newValues.rollNo;
+    delete newValues.studentName;
+    delete newValues.fatherName;
+    delete newValues.grade;
+
+    // Convert all values to numbers where applicable
+    Object.keys(newValues).forEach((key) => {
+      const value = Number(newValues[key]);
+      if (!isNaN(value)) {
+        newValues[key] = value;
+      }
+    });
+
+    const finalValues = {
+      ...newValues,
+      dueDate: getDateThreeDaysAhead(), // Set dueDate to 3 days ahead
+      studentId: studentId,
+      userId: userId,
+    };
+
+    return finalValues;
+  };
+
+  const generateChallan = async (values) => {
     try {
-      const response = await axiosInstance.put("/challan/data", values);
-      console.log(response);
+      // let studentData = student;
+
+      // if (!student) {
+      //   console.log("Student not found, fetching from API");
+      //   studentData = await loadStudentData(values.rollNo);
+      //   if (!studentData) {
+      //     // inserting new student
+      //     const studentResponse = await axiosInstance.post("/student", {
+      //       rollNo: values.rollNo,
+      //       name: values.studentName,
+      //       fatherName: values.fatherName,
+      //       grade: values.grade,
+      //     });
+      //     console.log("Student Response: ", studentResponse.data);
+      //     studentData = studentResponse.data.data;
+      //   }
+      // }
+
+      console.log("Vlaues: ...  ", values);
+
+      handlePrint();
+
+      // const challanValues = modifyValues(values, studentData._id, "12");
+      // console.log("Challan Values: ", challanValues);
+      // const response = await axiosInstance.post("/challan", challanValues);
+      // console.log("Response:", response.data);
+      // alert("Challan generated successfully");
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const editChallan = async (values) => {
+    try {
+      const response = await axiosInstance.put(
+        `/challan/${values._id}`,
+        values
+      );
+      console.log("Response:", response.data);
+      alert("Challan updated successfully");
     } catch (err) {
       console.log(err);
     }
   };
 
   useEffect(() => {
-    getInitialValues();
+    console.log("values", values);
+    if (buttonName === "Generate Challan") {
+      getInitialValues();
+    }
+    console.log("Initial Values: ", initialValues);
   }, []);
 
-  // update values in backend file
-  const onSubmit = async (values) => {
-    console.log("Form Data Submitted:", values);
-    await updateValues(values);
-    // seems like a good option reduces the number of API calls
-    setInitialValues(values);
+  const loadStudentData = async (rollNo) => {
+    try {
+      const response = await axiosInstance.get(`/student/${rollNo}`);
+      console.log("Student Data: ", response.data);
+      if (response.status === 400) {
+        return null;
+      }
+      // this will return student data
+      return response.data.data;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const rollNoKeyDown = async (event, values) => {
+    if (event.key === "Enter") {
+      console.log("name", values.studentName);
+      const studentData = await loadStudentData(values.rollNo);
+      console.log("Student: ", studentData);
+
+      if (!studentData) {
+        // Clear values and focus the studentName field
+        values.studentName = undefined;
+        values.fatherName = undefined;
+        values.grade = undefined;
+
+        if (studentNameRef.current) {
+          studentNameRef.current.focus();
+        }
+        return;
+      }
+
+      // Populate values and focus the next field
+      setStudent(studentData);
+      values.studentName = studentData.name;
+      values.fatherName = studentData.fatherName;
+      values.grade = studentData.grade;
+
+      if (admissionFeeRef.current) {
+        admissionFeeRef.current.focus();
+      }
+    }
+  };
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => {
+    setOpen(false);
+    close();
+  };
+
+  const onSubmit = (values) => {
+    if (buttonName === "Generate Challan") {
+      generateChallan(values);
+    } else {
+      editChallan(values);
+    }
     handleClose();
   };
 
   return (
     <div>
-      <button className="action-button" onClick={handleOpen}>
+      <button
+        disabled={isDisable}
+        className={isDisable ? "action-button-disabled" : "action-button"}
+        onClick={handleOpen}
+      >
         {buttonName}
       </button>
+
       <Modal open={open} onClose={handleClose}>
         <Box sx={style}>
           <Formik
@@ -151,16 +312,74 @@ const ChallanDataModal = ({ buttonName }) => {
             validationSchema={validationSchema}
             onSubmit={onSubmit}
           >
-            {({ errors, touched }) => (
+            {({ errors, touched, values }) => (
               <Form>
                 <Grid container spacing={2}>
                   <Grid item xs={4}>
+                    <Field
+                      as={TextField}
+                      label="Roll No."
+                      name="rollNo"
+                      fullWidth
+                      margin="normal"
+                      size="small"
+                      variant="outlined"
+                      error={touched.rollNo && !!errors.rollNo}
+                      helperText={<ErrorMessage name="firstName" />}
+                      onKeyDown={(event) => rollNoKeyDown(event, values)}
+                    />
+                    <Field
+                      as={TextField}
+                      label="Student Name"
+                      name="studentName"
+                      fullWidth
+                      // needed this because of programmatically setting the value
+                      InputLabelProps={{
+                        shrink: values.studentName,
+                      }}
+                      margin="normal"
+                      variant="outlined"
+                      size="small"
+                      inputRef={studentNameRef}
+                      error={touched.studentName && !!errors.studentName}
+                      helperText={<ErrorMessage name="studentName" />}
+                    />
+                    <Field
+                      as={TextField}
+                      label="D/O"
+                      name="fatherName"
+                      fullWidth
+                      InputLabelProps={{
+                        shrink: values.fatherName,
+                      }}
+                      margin="normal"
+                      variant="outlined"
+                      size="small"
+                      error={touched.fatherName && !!errors.fatherName}
+                      helperText={<ErrorMessage name="fatherName" />}
+                    />
+
+                    <Field
+                      as={TextField}
+                      label="Class"
+                      name="grade"
+                      fullWidth
+                      InputLabelProps={{
+                        shrink: values.grade,
+                      }}
+                      margin="normal"
+                      size="small"
+                      variant="outlined"
+                      error={touched.grade && !!errors.grade}
+                      helperText={<ErrorMessage name="grade" />}
+                    />
                     <Field
                       as={TextField}
                       label="Admission Fee"
                       name="admissionFee"
                       fullWidth
                       size="small"
+                      inputRef={admissionFeeRef}
                       margin="normal"
                       variant="outlined"
                       error={touched.admissionFee && !!errors.admissionFee}
@@ -201,6 +420,9 @@ const ChallanDataModal = ({ buttonName }) => {
                       }
                       helperText={<ErrorMessage name="studentIdCardFund" />}
                     />
+                  </Grid>
+
+                  <Grid item xs={4}>
                     <Field
                       as={TextField}
                       label="Red Cross Fund: PLS 900414-0"
@@ -237,9 +459,6 @@ const ChallanDataModal = ({ buttonName }) => {
                       }
                       helperText={<ErrorMessage name="studentWelfareFund" />}
                     />
-                  </Grid>
-
-                  <Grid item xs={4}>
                     <Field
                       as={TextField}
                       label="Sc. Breakage Fund: PLS 900122-0"
@@ -301,6 +520,10 @@ const ChallanDataModal = ({ buttonName }) => {
                       error={touched.sportsFund && !!errors.sportsFund}
                       helperText={<ErrorMessage name="sportsFund" />}
                     />
+                    {/* Add more fields for the left column */}
+                  </Grid>
+
+                  <Grid item xs={4}>
                     <Field
                       as={TextField}
                       label="Miscellaneous Fund"
@@ -328,9 +551,6 @@ const ChallanDataModal = ({ buttonName }) => {
                       }
                       helperText={<ErrorMessage name="boardUniProcessingFee" />}
                     />
-                  </Grid>
-
-                  <Grid item xs={4}>
                     <Field
                       as={TextField}
                       label="Transport Fund: BTA 4017-7"
@@ -411,8 +631,15 @@ const ChallanDataModal = ({ buttonName }) => {
                   color="primary"
                   fullWidth
                 >
-                  Change Values
+                  {buttonName === "Edit Challan"
+                    ? "Edit Challan"
+                    : "Generate Challan"}
                 </Button>
+                <div className="print-challan-div" ref={componentRef}>
+                  <ChallanComponent challan={values} label={"Bank"} />
+                  <ChallanComponent challan={values} label={"Student"} />
+                  <ChallanComponent challan={values} label={"College"} />
+                </div>
               </Form>
             )}
           </Formik>
@@ -422,4 +649,4 @@ const ChallanDataModal = ({ buttonName }) => {
   );
 };
 
-export default ChallanDataModal;
+export default ChallanModal;

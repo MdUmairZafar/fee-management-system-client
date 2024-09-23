@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import "./report.css"; // Import the CSS file for styling
-import axiosInstance from "../axiosConfig";
-import { AuthContext } from "../AuthContext";
-import PrintReport from "../Utils/printReport";
+import axiosInstance from "../Utils/axiosConfig";
+import { AuthContext } from "../Utils/AuthContext";
+import PrintReport from "./ReportPrint/printReport";
 
 const Report = () => {
   const { token } = useContext(AuthContext); // Retrieve token from context
@@ -27,18 +27,25 @@ const Report = () => {
       setError(null);
       try {
         // Construct query parameters for search and date range
+        const veryOldDate = new Date("1900-01-01").toISOString().split("T")[0];
+        const startDate = date1 || veryOldDate; // Use very old date if `date1` is not selected
+        // Get the current date if `date2` is not selected
+        const currentDate = new Date().toISOString().split("T")[0];
+        const endDate = date2 || currentDate; // Use current date if `date2` is not selected
         const queryParam =
           searchType === "name"
             ? `studentName=${nameQuery}`
             : `challanNo=${nameQuery}`;
         const dateRangeParam =
-          date1 && date2 ? `&startDate=${date1}&endDate=${date2}` : "";
-          const [response, sumResponse] = await Promise.all([
-            axiosInstance.get(`/challan?page=${page}&${queryParam}${dateRangeParam}&limit=10`),
-            axiosInstance.get(`/challan/sum?${dateRangeParam}`)
-          ]);// Update endpoint with search and pagination
-        
-          console.log(sumResponse.data.data)
+          date1 || date2 ? `&startDate=${startDate}&endDate=${endDate}` : "";
+        const [response, sumResponse] = await Promise.all([
+          axiosInstance.get(
+            `/challan?page=${page}&${queryParam}${dateRangeParam}&limit=10`
+          ),
+          axiosInstance.get(`/challan/sum?${dateRangeParam}`),
+        ]); // Update endpoint with search and pagination
+
+        console.log(sumResponse.data.data);
 
         setFetchedUserData(response.data.data);
         setTotalPages(response.data.totalPages); // Set total pages from response
@@ -86,13 +93,6 @@ const Report = () => {
     }
   };
 
-  // Trigger search by date range
-  const handleDateSearch = () => {
-    if (date1 && date2) {
-      setPage(1); // Reset page to 1 when performing a new date search
-    }
-  };
-
   // Toggle row selection on double click
   const handleRowDoubleClick = (id) => {
     setSelectedRows((prevSelected) => ({
@@ -129,13 +129,13 @@ const Report = () => {
               className="search-type-dropdown"
             >
               <option value="name">Name</option>
-              <option value="challanNo">Report No</option>
+              <option value="challanNo">Challan No</option>
             </select>
             <input
               type="search"
               name="search-field"
               placeholder={`Search by ${
-                searchType === "name" ? "Name" : "Report No"
+                searchType === "name" ? "Name" : "Challan No"
               }...`}
               value={searchTerm}
               onChange={handleSearchChange}
@@ -143,10 +143,8 @@ const Report = () => {
             />
           </div>
           <div className="top-buttons">
-            
             <PrintReport />
 
-           
             {/* Date Pickers */}
             <div className="date-picker">
               <input
@@ -163,7 +161,6 @@ const Report = () => {
               />
             </div>
             {/* Search by Date Button */}
-            
           </div>
         </div>
 
@@ -219,7 +216,7 @@ const Report = () => {
                     <td>{challan.studentId.fatherName}</td>
                     <td>{challan.studentId.rollNo}</td>
                     <td>{challan.studentId.class}</td>
-                    <td>{new Date(challan.updatedAt).toLocaleDateString()}</td>
+                    <td>{new Date(challan.createdAt).toLocaleDateString()}</td>
                     <td>{challan.admissionFee}</td>
                     <td>{challan.tuitionFee}</td>
                     <td>
@@ -301,77 +298,122 @@ const Report = () => {
             <tfoot>
               <tr>
                 <td></td>
-                <td></td><td></td><td></td><td></td><td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
                 <td>
                   <b>{sumData.admissionFee}</b>
                 </td>
-                <td><b>{sumData.tuitionFee}</b></td>
                 <td>
-                <b>{((sumData.admissionFee||0) + (sumData.tuitionFee||0))}</b>
+                  <b>{sumData.tuitionFee}</b>
                 </td>
                 <td>
-                <b>{sumData.generalFund}</b>
+                  <b>
+                    {(sumData.admissionFee || 0) + (sumData.tuitionFee || 0)}
+                  </b>
                 </td>
-                <td><b>{sumData.studentIdCardFund}</b></td>
-                <td><b>{sumData.redCrossFund}</b></td>
-                <td><b>{sumData.medicalFee}</b></td>
-                <td><b>{sumData.studentWelfareFund}</b></td>
-                <td><b>{sumData.scBreakageFund}</b></td>
-                <td><b>{sumData.magazineFund}</b></td>
-                <td><b>{sumData.librarySecFund}</b></td>
-                <td><b>{sumData.boardUnivRegExamDues}</b></td>
-                <td><b>{sumData.sportsFund}</b></td>
-                <td><b>{sumData.miscellaneousFund}</b></td>
-                <td><b>{sumData.boardUniProcessingFee}</b></td>
-                <td><b>{sumData.transportFund}</b></td>
-                <td><b>{sumData.burqaFund}</b></td>
-                <td><b>{sumData.collegeExaminationFund}</b></td>
-                <td><b>{sumData.computerFee}</b></td>
-                <td><b>{sumData.secondShiftFee}</b></td>
-                <td><b>{sumData.fineFunds}</b></td>
-                <td><b>{(sumData.generalFund || 0) +
-                    (sumData.studentIdCardFund || 0) +
-                    (sumData.redCrossFund || 0) +
-                    (sumData.medicalFee || 0) +
-                    (sumData.studentWelfareFund || 0) +
-                    (sumData.scBreakageFund || 0) +
-                    (sumData.magazineFund || 0) +
-                    (sumData.librarySecFund || 0) +
-                    (sumData.boardUnivRegExamDues || 0) +
-                    (sumData.sportsFund || 0) +
-                    (sumData.miscellaneousFund || 0) +
-                    (sumData.boardUniProcessingFee || 0) +
-                    (sumData.transportFund || 0) +
-                    (sumData.burqaFund || 0) +
-                    (sumData.collegeExaminationFund || 0) +
-                    (sumData.computerFee || 0) +
-                    (sumData.secondShift || 0) +
-                    (sumData.fineFunds || 0)}
-                    </b></td>
-                    <td><b>{
-                    (sumData.admissionFee+ sumData.tuitionFee)+
-                    (sumData.generalFund || 0) +
-                    (sumData.studentIdCardFund || 0) +
-                    (sumData.redCrossFund || 0) +
-                    (sumData.medicalFee || 0) +
-                    (sumData.studentWelfareFund || 0) +
-                    (sumData.scBreakageFund || 0) +
-                    (sumData.magazineFund || 0) +
-                    (sumData.librarySecFund || 0) +
-                    (sumData.boardUnivRegExamDues || 0) +
-                    (sumData.sportsFund || 0) +
-                    (sumData.miscellaneousFund || 0) +
-                    (sumData.boardUniProcessingFee || 0) +
-                    (sumData.transportFund || 0) +
-                    (sumData.burqaFund || 0) +
-                    (sumData.collegeExaminationFund || 0) +
-                    (sumData.computerFee || 0) +
-                    (sumData.secondShift || 0) +
-                    (sumData.fineFunds || 0)}
-                    </b></td>
-
-
-              
+                <td>
+                  <b>{sumData.generalFund}</b>
+                </td>
+                <td>
+                  <b>{sumData.studentIdCardFund}</b>
+                </td>
+                <td>
+                  <b>{sumData.redCrossFund}</b>
+                </td>
+                <td>
+                  <b>{sumData.medicalFee}</b>
+                </td>
+                <td>
+                  <b>{sumData.studentWelfareFund}</b>
+                </td>
+                <td>
+                  <b>{sumData.scBreakageFund}</b>
+                </td>
+                <td>
+                  <b>{sumData.magazineFund}</b>
+                </td>
+                <td>
+                  <b>{sumData.librarySecFund}</b>
+                </td>
+                <td>
+                  <b>{sumData.boardUnivRegExamDues}</b>
+                </td>
+                <td>
+                  <b>{sumData.sportsFund}</b>
+                </td>
+                <td>
+                  <b>{sumData.miscellaneousFund}</b>
+                </td>
+                <td>
+                  <b>{sumData.boardUniProcessingFee}</b>
+                </td>
+                <td>
+                  <b>{sumData.transportFund}</b>
+                </td>
+                <td>
+                  <b>{sumData.burqaFund}</b>
+                </td>
+                <td>
+                  <b>{sumData.collegeExaminationFund}</b>
+                </td>
+                <td>
+                  <b>{sumData.computerFee}</b>
+                </td>
+                <td>
+                  <b>{sumData.secondShiftFee}</b>
+                </td>
+                <td>
+                  <b>{sumData.fineFunds}</b>
+                </td>
+                <td>
+                  <b>
+                    {(sumData.generalFund || 0) +
+                      (sumData.studentIdCardFund || 0) +
+                      (sumData.redCrossFund || 0) +
+                      (sumData.medicalFee || 0) +
+                      (sumData.studentWelfareFund || 0) +
+                      (sumData.scBreakageFund || 0) +
+                      (sumData.magazineFund || 0) +
+                      (sumData.librarySecFund || 0) +
+                      (sumData.boardUnivRegExamDues || 0) +
+                      (sumData.sportsFund || 0) +
+                      (sumData.miscellaneousFund || 0) +
+                      (sumData.boardUniProcessingFee || 0) +
+                      (sumData.transportFund || 0) +
+                      (sumData.burqaFund || 0) +
+                      (sumData.collegeExaminationFund || 0) +
+                      (sumData.computerFee || 0) +
+                      (sumData.secondShift || 0) +
+                      (sumData.fineFunds || 0)}
+                  </b>
+                </td>
+                <td>
+                  <b>
+                    {sumData.admissionFee +
+                      sumData.tuitionFee +
+                      (sumData.generalFund || 0) +
+                      (sumData.studentIdCardFund || 0) +
+                      (sumData.redCrossFund || 0) +
+                      (sumData.medicalFee || 0) +
+                      (sumData.studentWelfareFund || 0) +
+                      (sumData.scBreakageFund || 0) +
+                      (sumData.magazineFund || 0) +
+                      (sumData.librarySecFund || 0) +
+                      (sumData.boardUnivRegExamDues || 0) +
+                      (sumData.sportsFund || 0) +
+                      (sumData.miscellaneousFund || 0) +
+                      (sumData.boardUniProcessingFee || 0) +
+                      (sumData.transportFund || 0) +
+                      (sumData.burqaFund || 0) +
+                      (sumData.collegeExaminationFund || 0) +
+                      (sumData.computerFee || 0) +
+                      (sumData.secondShift || 0) +
+                      (sumData.fineFunds || 0)}
+                  </b>
+                </td>
               </tr>
             </tfoot>
           </table>

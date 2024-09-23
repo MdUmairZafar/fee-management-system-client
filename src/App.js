@@ -1,29 +1,27 @@
 import React from "react";
-import { AuthProvider } from "./AuthContext";
-import LoginPage from "./login";
+import { AuthProvider } from "./Utils/AuthContext";
+import LoginPage from "./Utils/login";
 import User from "./User/user";
 import Report from "./Report/Report";
-import Table from "./table";
-import ChallanDataModal from "./challanDataModal";
+import Table from "./Utils/table";
+import ChallanDataModal from "./Challan/ChallanModals/challanDataModal";
 import Challan from "./Challan/challan";
 // import Layout from "./User/UserLayout";
-import Layout from "./Report/reportLayout"
-
+import Layout from "./Report/reportLayout";
 
 function App() {
   return (
     <AuthProvider>
       {/* <Router>
         <Routes> */}
-          {/* <Route path="/" element={<LoginPage />} /> */}
-          {/* <Route path="/" element={<Layout />} /> */}
-          
-          {/* Add other routes here */}
-          <Layout/>
-        {/* </Routes>
+      {/* <Route path="/" element={<LoginPage />} /> */}
+      {/* <Route path="/" element={<Layout />} /> */}
+
+      {/* Add other routes here */}
+      <Layout />
+      {/* </Routes>
       </Router> */}
     </AuthProvider>
-
   );
 }
 

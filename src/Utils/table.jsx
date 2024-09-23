@@ -1,5 +1,5 @@
 import "./table.css";
-import logo from "../src/Screenshot_2024-07-24-20-10-02-365_com.miui.videoplayer.png";
+import logo from "../college-logo.png";
 const Table = () => {
   return (
     <div className="sidebar">
@@ -18,10 +18,7 @@ const Table = () => {
         <button className="sidebar-button">Reports</button>
       </div>
 
-      {/* Empty Field */}
-
       {/* Button at the Bottom */}
-      
     </div>
   );
 };

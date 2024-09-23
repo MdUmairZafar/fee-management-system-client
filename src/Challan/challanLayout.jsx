@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-import Table from "../table"; // Import your Sidebar component
-import "./UserLayout.css"; // Import the CSS for layout
+import Table from "../Utils/table"; // Import your Sidebar component
+import "../layout.css"; // Import the CSS for layout
 import Challan from "./challan";
 
 

@@ -1,13 +1,13 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 import "./login.css"; // Import the CSS file for styling
-import logo from "../src/Screenshot_2024-07-24-20-10-02-365_com.miui.videoplayer.png"; // Updated the logo path
+import logo from "../college-logo.png"; // Updated the logo path
 import { AuthContext } from "./AuthContext";
 import { setupAxiosInterceptors } from "./axiosConfig";
 import axiosInstance from "./axiosConfig";
 
 const LoginPage = () => {
-  const [username, setUsername] = useState(""); 
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const { setUser, setToken } = useContext(AuthContext);
@@ -19,8 +19,8 @@ const LoginPage = () => {
     try {
       // Make the login request to your backend
       const response = await axiosInstance.post("/user/login", {
-        email: username, 
-        password: password
+        email: username,
+        password: password,
       });
 
       // Assuming the response contains the token and user data
@@ -42,7 +42,9 @@ const LoginPage = () => {
       console.error("Login failed:", error);
       // Display an error message to the user
       if (error.response && error.response.data) {
-        setError(error.response.data.message || "Login failed. Please try again.");
+        setError(
+          error.response.data.message || "Login failed. Please try again."
+        );
       } else {
         setError("Network error. Please try again.");
       }
@@ -70,7 +72,8 @@ const LoginPage = () => {
           required
         />
         <button type="submit">Login</button>
-        {error && <p className="error-message">{error}</p>} {/* Display error message */}
+        {error && <p className="error-message">{error}</p>}{" "}
+        {/* Display error message */}
       </form>
     </div>
   );

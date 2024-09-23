@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import "./user.css"; // Import the CSS file for styling
-import { AuthContext } from "../AuthContext";
-import axiosInstance, { setupAxiosInterceptors } from "../axiosConfig";
+import { AuthContext } from "../Utils/AuthContext";
+import axiosInstance, { setupAxiosInterceptors } from "../Utils/axiosConfig";
 
 const User = () => {
   // const { user, token } = useContext(AuthContext);
@@ -27,7 +27,6 @@ const User = () => {
         // console.log(response.data.a)
         setFetchedUserData(response.data.data);
         // Check if the response data is as expected
-       
       } catch (error) {
         console.error("Error fetching user data:", error);
         setError("Failed to fetch user data. Please try again.");

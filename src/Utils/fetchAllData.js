@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axiosInstance from "../axiosConfig";
+import axiosInstance from "./axiosConfig";
 
 const useFetchAllPages = (startDate = null, endDate = null) => {
   const [allData, setAllData] = useState([]);

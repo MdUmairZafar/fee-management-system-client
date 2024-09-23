@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Modal, Box, TextField, Button } from "@mui/material";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import "./user.css";
-import axiosInstance from "./axiosConfig";
+import "../user.css";
+import axiosInstance from "../../Utils/axiosConfig";
 
 // Define the style for the modal
 const style = {

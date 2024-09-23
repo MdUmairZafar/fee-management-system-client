@@ -1,9 +1,9 @@
 import React from "react";
-import Table from "../table"; // Import your Sidebar component
-import "../UserLayout.css"; // Import the CSS for layout
+import Table from "../Utils/table"; // Import your Sidebar component
+import "../layout.css"; // Import the CSS for layout
 import Report from "./Report";
 import Challan from "../Challan/challan";
-import ChallanModal from "../challanModal";
+import ChallanModal from "../Challan/ChallanModals/challanModal";
 
 const Layout = () => {
   return (

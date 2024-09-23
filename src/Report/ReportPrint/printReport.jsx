@@ -1,8 +1,8 @@
 import { useRef } from "react";
 import ReactToPrint from "react-to-print";
-import useFetchAllPages from "./fetchAllData.js";
+import useFetchAllPages from "../../Utils/fetchAllData.js";
 import ReportTable from "./ReportTable.jsx";
-import "../Report/report.css";
+import "../report.css";
 
 const PrintReport = ({ startDate, endDate }) => {
   const componentRef = useRef();
@@ -18,7 +18,7 @@ const PrintReport = ({ startDate, endDate }) => {
         <div>
           <ReactToPrint
             trigger={() => (
-              <button className="action-button" style={{ height: 70 }}>
+              <button className="action-button" style={{ height: 38 }}>
                 Print Table
               </button>
             )}

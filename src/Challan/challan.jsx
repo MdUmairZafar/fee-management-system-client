@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from "react";
 import "./challan.css"; // Import the CSS file for styling
-import axiosInstance from "../axiosConfig";
-import { AuthContext } from "../AuthContext";
-import ChallanModal from "../challanModal";
-import ChallanDataModal from "../challanDataModal";
+import axiosInstance from "../Utils/axiosConfig";
+import { AuthContext } from "../Utils/AuthContext";
+import ChallanModal from "./ChallanModals/challanModal";
+import ChallanDataModal from "./ChallanModals/challanDataModal";
 
 const Challan = () => {
   const { token } = useContext(AuthContext); // Retrieve token from context
@@ -29,6 +29,8 @@ const Challan = () => {
       setLoading(true);
       setError(null);
       try {
+        const veryOldDate = new Date("1900-01-01").toISOString().split("T")[0];
+        const startDate = date1 || veryOldDate; // Use very old date if `date1` is not selected
         // Get the current date if `date2` is not selected
         const currentDate = new Date().toISOString().split("T")[0];
         const endDate = date2 || currentDate; // Use current date if `date2` is not selected
@@ -36,12 +38,10 @@ const Challan = () => {
           searchType === "name"
             ? `studentName=${nameQuery}`
             : `challanNo=${nameQuery}`;
-        const dateRangeParam = date1
-          ? `&startDate=${date1}&endDate=${endDate}`
-          : "";
-
+        const dateRangeParam =
+          date1 || date2 ? `&startDate=${startDate}&endDate=${endDate}` : "";
         const response = await axiosInstance.get(
-          `/challan?page=${page}&${queryParam}${dateRangeParam}&limit=5`
+          `/challan?page=${page}&${queryParam}${dateRangeParam}&limit=10`
         ); // Update endpoint with search and pagination
         setFetchedUserData(response.data.data);
         console.log("response.data.data", response.data.data);
