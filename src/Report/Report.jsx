@@ -4,7 +4,7 @@ import axiosInstance from "../axiosConfig";
 import { AuthContext } from "../AuthContext";
 import PrintReport from "../Utils/printReport";
 
-const Challan = () => {
+const Report = () => {
   const { token } = useContext(AuthContext); // Retrieve token from context
   const [fetchChallanData, setFetchedUserData] = useState([]); // State for fetched challan data
   const [loading, setLoading] = useState(true);
@@ -18,6 +18,7 @@ const Challan = () => {
   const [searchType, setSearchType] = useState("name"); // State to track the selected search type
   const [selectedRows, setSelectedRows] = useState({}); // State to track selected rows
   const [paidRows, setPaidRows] = useState({}); // State to track paid status of rows
+  const [sumData, setSumData] = useState({}); // State for summed data
 
   // Fetch challan data from the backend
   useEffect(() => {
@@ -32,11 +33,16 @@ const Challan = () => {
             : `challanNo=${nameQuery}`;
         const dateRangeParam =
           date1 && date2 ? `&startDate=${date1}&endDate=${date2}` : "";
-        const response = await axiosInstance.get(
-          `/challan?page=${page}&${queryParam}${dateRangeParam}&limit=5`
-        ); // Update endpoint with search and pagination
+          const [response, sumResponse] = await Promise.all([
+            axiosInstance.get(`/challan?page=${page}&${queryParam}${dateRangeParam}&limit=10`),
+            axiosInstance.get(`/challan/sum?${dateRangeParam}`)
+          ]);// Update endpoint with search and pagination
+        
+          console.log(sumResponse.data.data)
+
         setFetchedUserData(response.data.data);
         setTotalPages(response.data.totalPages); // Set total pages from response
+        setSumData(sumResponse.data.data);
       } catch (error) {
         console.error("Error fetching challan data:", error);
         setError("Failed to fetch challan data. Please try again.");
@@ -123,13 +129,13 @@ const Challan = () => {
               className="search-type-dropdown"
             >
               <option value="name">Name</option>
-              <option value="challanNo">Challan No</option>
+              <option value="challanNo">Report No</option>
             </select>
             <input
               type="search"
               name="search-field"
               placeholder={`Search by ${
-                searchType === "name" ? "Name" : "Challan No"
+                searchType === "name" ? "Name" : "Report No"
               }...`}
               value={searchTerm}
               onChange={handleSearchChange}
@@ -137,10 +143,10 @@ const Challan = () => {
             />
           </div>
           <div className="top-buttons">
-            <button className="action-button">Pending</button>
+            
             <PrintReport />
 
-            <button className="action-button">Edit Challan Values</button>
+           
             {/* Date Pickers */}
             <div className="date-picker">
               <input
@@ -157,9 +163,7 @@ const Challan = () => {
               />
             </div>
             {/* Search by Date Button */}
-            <button className="action-button" onClick={markChallansAsPaid}>
-              Mark Challan as Done
-            </button>
+            
           </div>
         </div>
 
@@ -168,7 +172,7 @@ const Challan = () => {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Challan No</th>
+                <th>Report No</th>
                 <th>Name</th>
                 <th>D/O</th>
                 <th>Roll No</th>
@@ -209,7 +213,7 @@ const Challan = () => {
                     className={selectedRows[challan._id] ? "selected-row" : ""}
                     onDoubleClick={() => handleRowDoubleClick(challan._id)}
                   >
-                    {/* Challan Data */}
+                    {/* Report Data */}
                     <td>{challan.challanNo}</td>
                     <td>{challan.studentId.name}</td>
                     <td>{challan.studentId.fatherName}</td>
@@ -297,16 +301,77 @@ const Challan = () => {
             <tfoot>
               <tr>
                 <td></td>
+                <td></td><td></td><td></td><td></td><td></td>
                 <td>
-                  <b>Total 1</b>
+                  <b>{sumData.admissionFee}</b>
                 </td>
-                <td></td>
+                <td><b>{sumData.tuitionFee}</b></td>
                 <td>
-                  <b>Total 2</b>
+                <b>{((sumData.admissionFee||0) + (sumData.tuitionFee||0))}</b>
                 </td>
                 <td>
-                  <b>Total 3</b>
+                <b>{sumData.generalFund}</b>
                 </td>
+                <td><b>{sumData.studentIdCardFund}</b></td>
+                <td><b>{sumData.redCrossFund}</b></td>
+                <td><b>{sumData.medicalFee}</b></td>
+                <td><b>{sumData.studentWelfareFund}</b></td>
+                <td><b>{sumData.scBreakageFund}</b></td>
+                <td><b>{sumData.magazineFund}</b></td>
+                <td><b>{sumData.librarySecFund}</b></td>
+                <td><b>{sumData.boardUnivRegExamDues}</b></td>
+                <td><b>{sumData.sportsFund}</b></td>
+                <td><b>{sumData.miscellaneousFund}</b></td>
+                <td><b>{sumData.boardUniProcessingFee}</b></td>
+                <td><b>{sumData.transportFund}</b></td>
+                <td><b>{sumData.burqaFund}</b></td>
+                <td><b>{sumData.collegeExaminationFund}</b></td>
+                <td><b>{sumData.computerFee}</b></td>
+                <td><b>{sumData.secondShiftFee}</b></td>
+                <td><b>{sumData.fineFunds}</b></td>
+                <td><b>{(sumData.generalFund || 0) +
+                    (sumData.studentIdCardFund || 0) +
+                    (sumData.redCrossFund || 0) +
+                    (sumData.medicalFee || 0) +
+                    (sumData.studentWelfareFund || 0) +
+                    (sumData.scBreakageFund || 0) +
+                    (sumData.magazineFund || 0) +
+                    (sumData.librarySecFund || 0) +
+                    (sumData.boardUnivRegExamDues || 0) +
+                    (sumData.sportsFund || 0) +
+                    (sumData.miscellaneousFund || 0) +
+                    (sumData.boardUniProcessingFee || 0) +
+                    (sumData.transportFund || 0) +
+                    (sumData.burqaFund || 0) +
+                    (sumData.collegeExaminationFund || 0) +
+                    (sumData.computerFee || 0) +
+                    (sumData.secondShift || 0) +
+                    (sumData.fineFunds || 0)}
+                    </b></td>
+                    <td><b>{
+                    (sumData.admissionFee+ sumData.tuitionFee)+
+                    (sumData.generalFund || 0) +
+                    (sumData.studentIdCardFund || 0) +
+                    (sumData.redCrossFund || 0) +
+                    (sumData.medicalFee || 0) +
+                    (sumData.studentWelfareFund || 0) +
+                    (sumData.scBreakageFund || 0) +
+                    (sumData.magazineFund || 0) +
+                    (sumData.librarySecFund || 0) +
+                    (sumData.boardUnivRegExamDues || 0) +
+                    (sumData.sportsFund || 0) +
+                    (sumData.miscellaneousFund || 0) +
+                    (sumData.boardUniProcessingFee || 0) +
+                    (sumData.transportFund || 0) +
+                    (sumData.burqaFund || 0) +
+                    (sumData.collegeExaminationFund || 0) +
+                    (sumData.computerFee || 0) +
+                    (sumData.secondShift || 0) +
+                    (sumData.fineFunds || 0)}
+                    </b></td>
+
+
+              
               </tr>
             </tfoot>
           </table>
@@ -337,4 +402,4 @@ const Challan = () => {
   );
 };
 
-export default Challan;
+export default Report;

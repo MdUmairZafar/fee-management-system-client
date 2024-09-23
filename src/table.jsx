@@ -13,17 +13,15 @@ const Table = () => {
 
       {/* Buttons */}
       <div className="buttons">
-        <button className="sidebar-button">Home</button>
-        <button className="sidebar-button">About</button>
-        <button className="sidebar-button">Services</button>
+        <button className="sidebar-button">User</button>
+        <button className="sidebar-button">Challan</button>
+        <button className="sidebar-button">Reports</button>
       </div>
 
       {/* Empty Field */}
 
       {/* Button at the Bottom */}
-      <div className="bottom-button">
-        <button className="sidebar-button">Submit</button>
-      </div>
+      
     </div>
   );
 };
