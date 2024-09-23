@@ -18,10 +18,13 @@ const Challan = () => {
   const [searchTerm, setSearchTerm] = useState(""); // State for input value
   const [searchType, setSearchType] = useState("name"); // State to track the selected search type
   const [selectedRows, setSelectedRows] = useState({}); // State to track selected rows
-  const [paidRows, setPaidRows] = useState({}); // State to track paid status of rows
+  const [selectedRowData, setSelectedRowData] = useState(null); // State to store selected row data
+  const [trigger, setTrigger] = useState(false); // State to trigger re-fetching data
+  const [modalOpen, setModalOpen] = useState(false);
 
   // Fetch challan data from the backend
   useEffect(() => {
+    console.log("In useEffect");
     const fetchChallanData = async () => {
       setLoading(true);
       setError(null);
@@ -33,12 +36,15 @@ const Challan = () => {
           searchType === "name"
             ? `studentName=${nameQuery}`
             : `challanNo=${nameQuery}`;
-        const dateRangeParam = date1 ? `&startDate=${date1}&endDate=${endDate}` : "";
-        
+        const dateRangeParam = date1
+          ? `&startDate=${date1}&endDate=${endDate}`
+          : "";
+
         const response = await axiosInstance.get(
           `/challan?page=${page}&${queryParam}${dateRangeParam}&limit=5`
         ); // Update endpoint with search and pagination
         setFetchedUserData(response.data.data);
+        console.log("response.data.data", response.data.data);
         setTotalPages(response.data.totalPages); // Set total pages from response
       } catch (error) {
         console.error("Error fetching challan data:", error);
@@ -49,11 +55,34 @@ const Challan = () => {
     };
 
     fetchChallanData();
-  }, [page, nameQuery, searchType, date1, date2]); // Fetch data when page, search query, search type, or date changes
+  }, [
+    page,
+    nameQuery,
+    searchType,
+    date1,
+    date2,
+    trigger,
+    selectedRowData,
+    modalOpen,
+  ]); // Fetch data when page, search query, search type, or date changes
+
+  // Reset states when modalOpen changes
+  useEffect(() => {
+    resetStates();
+  }, [modalOpen]);
+
+  const resetStates = () => {
+    setSelectedRows({});
+    setSelectedRowData(null);
+  };
 
   // Handle input change for the search field
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
+  };
+
+  const handleModalClose = () => {
+    setModalOpen(!modalOpen); // This will trigger a re-render
   };
 
   // Trigger search on Enter key or button click
@@ -68,8 +97,8 @@ const Challan = () => {
     setError(null);
 
     // Update the search query and reset to the first page
-    setNameQuery(searchTerm); 
-    setPage(1); 
+    setNameQuery(searchTerm);
+    setPage(1);
   };
 
   // Capture Enter key press to trigger search
@@ -77,6 +106,22 @@ const Challan = () => {
     if (e.key === "Enter") {
       handleSearch();
     }
+  };
+
+  // Toggle row selection on double click
+  const handleRowDoubleClick = (data) => {
+    setSelectedRows((prevSelected) => ({
+      [data._id]: !prevSelected[data._id],
+    }));
+    if (selectedRows[data._id]) {
+      console.log("in IF part: ", selectedRows[data._id]);
+      setSelectedRowData(null);
+    } else {
+      console.log("in elsex part: ", selectedRows[data._id]);
+      setSelectedRowData(data);
+    }
+
+    console.log("Selected Rows:", selectedRowData);
   };
 
   // Handle date changes
@@ -92,15 +137,38 @@ const Challan = () => {
     }
   };
 
-  // Toggle row selection on double click
-  const markChallansAsPaid = () => {
-    const updatedPaidRows = { ...paidRows };
-    Object.keys(selectedRows).forEach((id) => {
-      if (selectedRows[id]) {
-        updatedPaidRows[id] = true;
+  // Use it in your function (e.g., when marking a challan as paid)
+  const markChallansAsPaid = async () => {
+    if (selectedRowData) {
+      console.log("Selected Row Data:", selectedRowData);
+      // updating status in backend
+      if (selectedRowData.isPaid) {
+        alert("Challan already paid");
+        return;
       }
-    });
-    setPaidRows(updatedPaidRows);
+      const response = await axiosInstance.patch(
+        `/challan/${selectedRowData._id}`,
+        {
+          isPaid: true,
+        }
+      );
+      console.log("Response:", response);
+      setTrigger(!trigger); // Trigger re-fetching data
+    } else {
+      console.log("No row selected");
+    }
+  };
+
+  const getTransformedValues = (selectedRowData) => {
+    const { studentId, ...rest } = selectedRowData;
+    return {
+      ...rest,
+      studentName: studentId.name,
+      grade: studentId.class,
+      rollNo: studentId.rollNo,
+      fatherName: studentId.fatherName,
+      studentId: studentId._id,
+    };
   };
 
   // Display loading or error states
@@ -134,9 +202,20 @@ const Challan = () => {
           </div>
           <div className="top-buttons">
             <ChallanDataModal buttonName={"Edit Default Values"} />
-            <ChallanModal buttonName={"Generate Challan"} />
-            <ChallanModal buttonName={"Edit Challan"} />
-            
+            <ChallanModal
+              buttonName={"Generate Challan"}
+              close={handleModalClose}
+            />
+            {selectedRowData ? (
+              <ChallanModal
+                buttonName={"Edit Challan"}
+                close={handleModalClose}
+                isDisable={false}
+                values={getTransformedValues(selectedRowData)}
+              />
+            ) : (
+              <ChallanModal buttonName={"Edit Challan"} isDisable={true} />
+            )}
             {/* From Date Picker */}
             <div className="date-picker">
               <label>From:</label>
@@ -146,7 +225,7 @@ const Challan = () => {
                 onChange={(e) => handleDateChange(e, setDate1)}
               />
             </div>
-            
+
             {/* To Date Picker */}
             <div className="date-picker">
               <label>To:</label>
@@ -156,7 +235,7 @@ const Challan = () => {
                 onChange={(e) => handleDateChange(e, setDate2)}
               />
             </div>
-            
+
             {/* Mark Challan as Done Button */}
             <button className="action-button" onClick={markChallansAsPaid}>
               Mark Challan as Done
@@ -167,19 +246,76 @@ const Challan = () => {
         {/* Table */}
         <div className="table-wrapper">
           <table className="data-table">
-            {/* Table Headers */}
             <thead>
               <tr>
-                {/* ... existing table headers ... */}
+                <th>Challan No</th>
+                <th>Name</th>
+                <th>D/O</th>
+                <th>Roll No</th>
+                <th>Class</th>
+                <th>Dated</th>
+                <th>Admission Fee</th>
+                <th>Tuition Fee</th>
+                <th>General Fund</th>
+                <th>Student I.D Card Fund</th>
+                <th>Red Cross Fund</th>
+                <th>Medical Fee</th>
+                <th>Student Welfare Fund</th>
+                <th>Sc. Breakage Fund</th>
+                <th>Magazine Fund</th>
+                <th>Library Sec Fund</th>
+                <th>Board/Univ Regd/Exam Dues</th>
+                <th>Sports Fund</th>
+                <th>Miscellaneous Fund</th>
+                <th>Board Uni Processing Fee</th>
+                <th>Transport Fund</th>
+                <th>Burqa Fund</th>
+                <th>College Examination Fund</th>
+                <th>Computer Fee</th>
+                <th>2nd Shift</th>
+                <th>Fine Funds</th>
+                <th>Grand Total</th>
+                <th>Action</th>
               </tr>
             </thead>
-            {/* Table Body */}
             <tbody>
-              {Array.isArray(fetchChallanData) && fetchChallanData.length > 0 ? (
+              {Array.isArray(fetchChallanData) &&
+              fetchChallanData.length > 0 ? (
                 fetchChallanData.map((challan) => (
-                  <tr key={challan._id}>
+                  <tr
+                    key={challan._id}
+                    className={selectedRows[challan._id] ? "selected-row" : ""}
+                    onDoubleClick={() => handleRowDoubleClick(challan)}
+                  >
                     {/* Challan Data */}
-                    {/* ... existing table rows and data ... */}
+                    <td>{challan.challanNo}</td>
+                    <td>{challan.studentId.name}</td>
+                    <td>{challan.studentId.fatherName}</td>
+                    <td>{challan.studentId.rollNo}</td>
+                    <td>{challan.studentId.class}</td>
+                    <td>{new Date(challan.createdAt).toLocaleDateString()}</td>
+                    <td>{challan.admissionFee}</td>
+                    <td>{challan.tuitionFee}</td>
+                    <td>{challan.generalFund}</td>
+                    <td>{challan.studentIdCardFund}</td>
+                    <td>{challan.redCrossFund}</td>
+                    <td>{challan.medicalFee}</td>
+                    <td>{challan.studentWelfareFund}</td>
+                    <td>{challan.scBreakageFund}</td>
+                    <td>{challan.magazineFund}</td>
+                    <td>{challan.librarySecFund}</td>
+                    <td>{challan.boardUnivRegExamDues}</td>
+                    <td>{challan.sportsFund}</td>
+                    <td>{challan.miscellaneousFund}</td>
+                    <td>{challan.boardUniProcessingFee}</td>
+                    <td>{challan.transportFund}</td>
+                    <td>{challan.burqaFund}</td>
+                    <td>{challan.collegeExaminationFund}</td>
+                    <td>{challan.computerFee}</td>
+                    <td>{challan.secondShift}</td>
+                    <td>{challan.fineFunds}</td>
+                    <td>{challan.grandTotal}</td>
+                    <td>{challan.isPaid ? "Paid" : "Pending"}</td>
                   </tr>
                 ))
               ) : (

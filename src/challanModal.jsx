@@ -4,6 +4,9 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import "./Challan/challan.css";
 import axiosInstance from "./axiosConfig";
+import { useReactToPrint } from "react-to-print";
+import ChallanComponent from "./Challan/challanPrint";
+import "./Challan/challanPrint.css";
 
 const style = {
   position: "absolute",
@@ -23,7 +26,7 @@ const validationSchema = Yup.object().shape({
   rollNo: Yup.string().required("Roll No. is required"),
   studentName: Yup.string().required("Student Name is required"),
   fatherName: Yup.string().required("Father Name is required"),
-  class: Yup.string().required("Class is required"),
+  grade: Yup.string().required("Class is required"),
   admissionFee: Yup.number()
     .typeError("Admission Fee must be a number")
     .min(0, "Admission Fee must be a positive number")
@@ -106,19 +109,29 @@ const validationSchema = Yup.object().shape({
     .nullable(),
 });
 
-const ChallanModal = ({ values, buttonName }) => {
-  const [open, setOpen] = useState(false);
-  const [initialValues, setInitialValues] = useState({
+const ChallanModal = ({
+  values = {
     rollNo: "",
     studentName: "",
     fatherName: "",
-    class: "",
+    grade: "",
     tuitionFee: "",
-  });
+  },
+  buttonName,
+  isDisable,
+  close,
+}) => {
+  const [open, setOpen] = useState(false);
+  const [initialValues, setInitialValues] = useState(values);
   const [student, setStudent] = useState(null);
   // to shift focus to these fields based case of student data
   const studentNameRef = useRef(null);
   const admissionFeeRef = useRef(null);
+  const componentRef = useRef();
+
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  });
 
   // to get default values when generating the challan
   const getInitialValues = async () => {
@@ -148,7 +161,7 @@ const ChallanModal = ({ values, buttonName }) => {
     delete newValues.rollNo;
     delete newValues.studentName;
     delete newValues.fatherName;
-    delete newValues.class;
+    delete newValues.grade;
 
     // Convert all values to numbers where applicable
     Object.keys(newValues).forEach((key) => {
@@ -170,27 +183,33 @@ const ChallanModal = ({ values, buttonName }) => {
 
   const generateChallan = async (values) => {
     try {
-      let studentData = student;
+      // let studentData = student;
 
-      if (!student) {
-        console.log("Student not found, fetching from API");
-        studentData = await loadStudentData(values.rollNo);
-        if (!studentData) {
-          // inserting new student
-          const studentResponse = await axiosInstance.post("/student", {
-            rollNo: values.rollNo,
-            name: values.studentName,
-            fatherName: values.fatherName,
-            class: values.class,
-          });
-          console.log("Student Response: ", studentResponse.data);
-          studentData = studentResponse.data.data;
-        }
-      }
-      const challanValues = modifyValues(values, studentData._id, "12");
-      console.log("Challan Values: ", challanValues);
-      const response = await axiosInstance.post("/challan", challanValues);
-      console.log("Response:", response.data);
+      // if (!student) {
+      //   console.log("Student not found, fetching from API");
+      //   studentData = await loadStudentData(values.rollNo);
+      //   if (!studentData) {
+      //     // inserting new student
+      //     const studentResponse = await axiosInstance.post("/student", {
+      //       rollNo: values.rollNo,
+      //       name: values.studentName,
+      //       fatherName: values.fatherName,
+      //       grade: values.grade,
+      //     });
+      //     console.log("Student Response: ", studentResponse.data);
+      //     studentData = studentResponse.data.data;
+      //   }
+      // }
+
+      console.log("Vlaues: ...  ", values);
+
+      handlePrint();
+
+      // const challanValues = modifyValues(values, studentData._id, "12");
+      // console.log("Challan Values: ", challanValues);
+      // const response = await axiosInstance.post("/challan", challanValues);
+      // console.log("Response:", response.data);
+      // alert("Challan generated successfully");
     } catch (err) {
       console.log(err);
     }
@@ -203,12 +222,14 @@ const ChallanModal = ({ values, buttonName }) => {
         values
       );
       console.log("Response:", response.data);
+      alert("Challan updated successfully");
     } catch (err) {
       console.log(err);
     }
   };
 
   useEffect(() => {
+    console.log("values", values);
     if (buttonName === "Generate Challan") {
       getInitialValues();
     }
@@ -239,7 +260,7 @@ const ChallanModal = ({ values, buttonName }) => {
         // Clear values and focus the studentName field
         values.studentName = undefined;
         values.fatherName = undefined;
-        values.class = undefined;
+        values.grade = undefined;
 
         if (studentNameRef.current) {
           studentNameRef.current.focus();
@@ -251,7 +272,7 @@ const ChallanModal = ({ values, buttonName }) => {
       setStudent(studentData);
       values.studentName = studentData.name;
       values.fatherName = studentData.fatherName;
-      values.class = studentData.class;
+      values.grade = studentData.grade;
 
       if (admissionFeeRef.current) {
         admissionFeeRef.current.focus();
@@ -260,7 +281,10 @@ const ChallanModal = ({ values, buttonName }) => {
   };
 
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    close();
+  };
 
   const onSubmit = (values) => {
     if (buttonName === "Generate Challan") {
@@ -273,9 +297,14 @@ const ChallanModal = ({ values, buttonName }) => {
 
   return (
     <div>
-      <button className="action-button" onClick={handleOpen}>
+      <button
+        disabled={isDisable}
+        className={isDisable ? "action-button-disabled" : "action-button"}
+        onClick={handleOpen}
+      >
         {buttonName}
       </button>
+
       <Modal open={open} onClose={handleClose}>
         <Box sx={style}>
           <Formik
@@ -333,16 +362,16 @@ const ChallanModal = ({ values, buttonName }) => {
                     <Field
                       as={TextField}
                       label="Class"
-                      name="class"
+                      name="grade"
                       fullWidth
                       InputLabelProps={{
-                        shrink: values.class,
+                        shrink: values.grade,
                       }}
                       margin="normal"
                       size="small"
                       variant="outlined"
-                      error={touched.class && !!errors.class}
-                      helperText={<ErrorMessage name="class" />}
+                      error={touched.grade && !!errors.grade}
+                      helperText={<ErrorMessage name="grade" />}
                     />
                     <Field
                       as={TextField}
@@ -602,8 +631,15 @@ const ChallanModal = ({ values, buttonName }) => {
                   color="primary"
                   fullWidth
                 >
-                  Generate Challan
+                  {buttonName === "Edit Challan"
+                    ? "Edit Challan"
+                    : "Generate Challan"}
                 </Button>
+                <div className="print-challan-div" ref={componentRef}>
+                  <ChallanComponent challan={values} label={"Bank"} />
+                  <ChallanComponent challan={values} label={"Student"} />
+                  <ChallanComponent challan={values} label={"College"} />
+                </div>
               </Form>
             )}
           </Formik>

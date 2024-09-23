@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import "./report.css"; // Import the CSS file for styling
 import axiosInstance from "../axiosConfig";
 import { AuthContext } from "../AuthContext";
+import PrintReport from "../Utils/printReport";
 
 const Challan = () => {
   const { token } = useContext(AuthContext); // Retrieve token from context
@@ -137,8 +138,8 @@ const Challan = () => {
           </div>
           <div className="top-buttons">
             <button className="action-button">Pending</button>
-            <button className="action-button">Done</button>
-            <button className="action-button">Generate Challan</button>
+            <PrintReport />
+
             <button className="action-button">Edit Challan Values</button>
             {/* Date Pickers */}
             <div className="date-picker">
@@ -194,18 +195,18 @@ const Challan = () => {
                 <th>Computer Fee</th>
                 <th>2nd Shift</th>
                 <th>Fine Funds</th>
+                <th>Total</th>
                 <th>Grand Total</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {Array.isArray(fetchChallanData) && fetchChallanData.length > 0 ? (
+              {Array.isArray(fetchChallanData) &&
+              fetchChallanData.length > 0 ? (
                 fetchChallanData.map((challan) => (
                   <tr
                     key={challan._id}
-                    className={
-                      selectedRows[challan._id] ? "selected-row" : ""
-                    }
+                    className={selectedRows[challan._id] ? "selected-row" : ""}
                     onDoubleClick={() => handleRowDoubleClick(challan._id)}
                   >
                     {/* Challan Data */}
@@ -217,6 +218,9 @@ const Challan = () => {
                     <td>{new Date(challan.updatedAt).toLocaleDateString()}</td>
                     <td>{challan.admissionFee}</td>
                     <td>{challan.tuitionFee}</td>
+                    <td>
+                      {(challan.admissionFee || 0) + (challan.tuitionFee || 0)}
+                    </td>
                     <td>{challan.generalFund}</td>
                     <td>{challan.studentIdCardFund}</td>
                     <td>{challan.redCrossFund}</td>
@@ -235,8 +239,48 @@ const Challan = () => {
                     <td>{challan.computerFee}</td>
                     <td>{challan.secondShift}</td>
                     <td>{challan.fineFunds}</td>
-                    <td>{}</td>
-                    <td>{challan.grandTotal}</td>
+                    <td>
+                      {(challan.generalFund || 0) +
+                        (challan.studentIdCardFund || 0) +
+                        (challan.redCrossFund || 0) +
+                        (challan.medicalFee || 0) +
+                        (challan.studentWelfareFund || 0) +
+                        (challan.scBreakageFund || 0) +
+                        (challan.magazineFund || 0) +
+                        (challan.librarySecFund || 0) +
+                        (challan.boardUnivRegExamDues || 0) +
+                        (challan.sportsFund || 0) +
+                        (challan.miscellaneousFund || 0) +
+                        (challan.boardUniProcessingFee || 0) +
+                        (challan.transportFund || 0) +
+                        (challan.burqaFund || 0) +
+                        (challan.collegeExaminationFund || 0) +
+                        (challan.computerFee || 0) +
+                        (challan.secondShift || 0) +
+                        (challan.fineFunds || 0)}
+                    </td>
+                    <td>
+                      {(challan.admissionFee || 0) +
+                        (challan.tuitionFee || 0) +
+                        (challan.generalFund || 0) +
+                        (challan.studentIdCardFund || 0) +
+                        (challan.redCrossFund || 0) +
+                        (challan.medicalFee || 0) +
+                        (challan.studentWelfareFund || 0) +
+                        (challan.scBreakageFund || 0) +
+                        (challan.magazineFund || 0) +
+                        (challan.librarySecFund || 0) +
+                        (challan.boardUnivRegExamDues || 0) +
+                        (challan.sportsFund || 0) +
+                        (challan.miscellaneousFund || 0) +
+                        (challan.boardUniProcessingFee || 0) +
+                        (challan.transportFund || 0) +
+                        (challan.burqaFund || 0) +
+                        (challan.collegeExaminationFund || 0) +
+                        (challan.computerFee || 0) +
+                        (challan.secondShift || 0) +
+                        (challan.fineFunds || 0)}
+                    </td>
                     {/* Action Cell */}
                     <td className="action-cell">
                       {paidRows[challan._id] ? "Paid" : "Pending"}
@@ -249,10 +293,8 @@ const Challan = () => {
                 </tr>
               )}
             </tbody>
-                       
-           
+
             <tfoot>
-              
               <tr>
                 <td></td>
                 <td>

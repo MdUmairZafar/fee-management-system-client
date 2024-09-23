@@ -65,6 +65,16 @@ body {
   transition: background-color 0.3s;
 }
 
+.action-button-disabled {
+  padding: 10px 20px;
+  background-color: #b1b5b8;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
 .action-button:hover {
   background-color: #2980b9;
 }
@@ -103,7 +113,6 @@ body {
   background-color: #f8f8f8;
   font-weight: bold;
 }
-
 
 .pagination {
   display: flex;
