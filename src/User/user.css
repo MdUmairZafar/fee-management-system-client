@@ -29,10 +29,10 @@ body {
   overflow-y: hidden; /* Disable vertical scrolling */
 }
 
-.top-bar {
+.top-bar-user {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: right;
+  align-items: right;
   width: 100%;
   margin-bottom: 20px;
 }
@@ -44,11 +44,6 @@ body {
   border-radius: 15px;
 }
 
-.top-buttons {
-  display: flex;
-  gap: 10px;
-}
-
 .date-picker input {
   padding: 8px;
   border: 1px solid #ddd;
@@ -57,7 +52,18 @@ body {
 
 .action-button {
   padding: 10px 20px;
+  margin-right: 20px;
   background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.action-button-disabled {
+  padding: 10px 20px;
+  background-color: #b1b5b8;
   color: white;
   border: none;
   border-radius: 5px;
@@ -151,6 +157,12 @@ body {
 
 .pagination-button.active {
   background-color: #2980b9;
+}
+
+.selected-row {
+  background-color: #e0f7fa; /* Light cyan background to indicate selection */
+  font-weight: bold; /* Make text bold for selected rows */
+  color: #00796b; /* Text color for better contrast */
 }
 
 .error-message {

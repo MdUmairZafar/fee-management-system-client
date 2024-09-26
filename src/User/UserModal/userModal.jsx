@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Box, TextField, Button } from "@mui/material";
+import { Modal, Box, TextField, Button, alpha } from "@mui/material";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import "../user.css";
@@ -31,34 +31,41 @@ const validationSchema = Yup.object().shape({
   type: Yup.string().required("Type is required"),
 });
 
-const UserModal = ({ values, buttonName }) => {
-  const [open, setOpen] = useState(false);
-  const [initialValues, setInitialValues] = useState({
+const UserModal = ({
+  values = {
     name: "",
     email: "",
     phone: "",
     password: "",
     type: "",
-  });
+  },
+  buttonName,
+  isDisabled = false,
+  close,
+}) => {
+  const [open, setOpen] = useState(false);
+  const [initialValues, setInitialValues] = useState(values);
 
-  useEffect(() => {
-    if (values) {
-      setInitialValues(values);
-    }
-  }, []);
   // for creating user
   const createUser = async (data) => {
     try {
       const response = await axiosInstance.post("/user", data);
       console.log("User created: ", response.data);
+      alert("User created successfully");
+      handleClose();
     } catch (error) {
       console.log("Error in creating user: ", error);
     }
   };
   const editUser = async (data) => {
+    const id = data._id;
+    delete data._id;
+    console.log("Data to update: ", data);
     try {
-      const response = await axiosInstance.put(`/user/${data._id}`, data);
+      const response = await axiosInstance.put(`/user/${id}`, data);
       console.log("User updated: ", response.data);
+      alert("User updated successfully");
+      handleClose();
     } catch (error) {
       console.log("Error in updating user: ", error);
     }
@@ -72,16 +79,23 @@ const UserModal = ({ values, buttonName }) => {
       editUser(values);
     }
     console.log("Form values: ", values);
-    handleClose(); // Close the modal after submission
+    // Close the modal after submission
   };
 
   // Modal open/close handlers
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    close();
+  };
 
   return (
     <div>
-      <button className="action-button" onClick={handleOpen}>
+      <button
+        className={isDisabled ? "action-button-disabled" : "action-button"}
+        onClick={handleOpen}
+        disabled={isDisabled}
+      >
         {buttonName}
       </button>
       <Modal open={open} onClose={handleClose}>
@@ -130,7 +144,6 @@ const UserModal = ({ values, buttonName }) => {
                   as={TextField}
                   label="Password"
                   name="password"
-                  type="password"
                   fullWidth
                   margin="normal"
                   variant="outlined"
@@ -150,7 +163,7 @@ const UserModal = ({ values, buttonName }) => {
                 />
 
                 <Button type="submit" variant="contained" color="primary">
-                  Submit
+                  {buttonName === "Create User" ? "Create" : "Update"}
                 </Button>
               </Form>
             )}

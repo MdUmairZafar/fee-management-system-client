@@ -1,27 +1,32 @@
-import React from "react";
-import { AuthProvider } from "./Utils/AuthContext";
-import LoginPage from "./Utils/login";
-import User from "./User/user";
-import Report from "./Report/Report";
-import Table from "./Utils/table";
-import ChallanDataModal from "./Challan/ChallanModals/challanDataModal";
-import Challan from "./Challan/challan";
-// import Layout from "./User/UserLayout";
-import Layout from "./Report/reportLayout";
+import React, { useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import Login from "./Utils/login";
+import MainLayout from "./Utils/MainLayout";
+import { setupAxiosInterceptors } from "./Utils/axiosConfig";
 
 function App() {
+  useEffect(() => {
+    const token = JSON.parse(localStorage.getItem("token"));
+    if (token) {
+      // Setup axios interceptors
+      setupAxiosInterceptors(token);
+    }
+  });
   return (
-    <AuthProvider>
-      {/* <Router>
-        <Routes> */}
-      {/* <Route path="/" element={<LoginPage />} /> */}
-      {/* <Route path="/" element={<Layout />} /> */}
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} />
 
-      {/* Add other routes here */}
-      <Layout />
-      {/* </Routes>
-      </Router> */}
-    </AuthProvider>
+        {/* Main layout that wraps all screens with sidebar */}
+        <Route path="/*" element={<MainLayout />} />
+        {/* <Route path="/" element={<Navigate to="/login" />} /> */}
+      </Routes>
+    </Router>
   );
 }
 

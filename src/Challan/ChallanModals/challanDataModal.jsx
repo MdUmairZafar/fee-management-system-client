@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Box, Button, Modal, TextField, Grid } from "@mui/material";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import "../challan.css";
 import axiosInstance from "../../Utils/axiosConfig";
 
 const style = {
@@ -101,7 +102,7 @@ const validationSchema = Yup.object().shape({
     .nullable(),
 });
 
-const ChallanDataModal = ({ buttonName }) => {
+const ChallanDataModal = ({ buttonName, isDisable }) => {
   const [open, setOpen] = useState(false);
   const [initialValues, setInitialValues] = useState({});
 
@@ -141,7 +142,11 @@ const ChallanDataModal = ({ buttonName }) => {
 
   return (
     <div>
-      <button className="action-button" onClick={handleOpen}>
+      <button
+        className={isDisable ? "action-button-disabled" : "action-button"}
+        disabled={isDisable}
+        onClick={handleOpen}
+      >
         {buttonName}
       </button>
       <Modal open={open} onClose={handleClose}>

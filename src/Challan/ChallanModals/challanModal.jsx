@@ -183,33 +183,33 @@ const ChallanModal = ({
 
   const generateChallan = async (values) => {
     try {
-      // let studentData = student;
+      let studentData = student;
 
-      // if (!student) {
-      //   console.log("Student not found, fetching from API");
-      //   studentData = await loadStudentData(values.rollNo);
-      //   if (!studentData) {
-      //     // inserting new student
-      //     const studentResponse = await axiosInstance.post("/student", {
-      //       rollNo: values.rollNo,
-      //       name: values.studentName,
-      //       fatherName: values.fatherName,
-      //       grade: values.grade,
-      //     });
-      //     console.log("Student Response: ", studentResponse.data);
-      //     studentData = studentResponse.data.data;
-      //   }
-      // }
+      if (!student) {
+        console.log("Student not found, fetching from API");
+        studentData = await loadStudentData(values.rollNo);
+        if (!studentData) {
+          // inserting new student
+          const studentResponse = await axiosInstance.post("/student", {
+            rollNo: values.rollNo,
+            name: values.studentName,
+            fatherName: values.fatherName,
+            grade: values.grade,
+          });
+          console.log("Student Response: ", studentResponse.data);
+          studentData = studentResponse.data.data;
+        }
+      }
 
       console.log("Vlaues: ...  ", values);
 
+      const challanValues = modifyValues(values, studentData._id, "12");
+      console.log("Challan Values: ", challanValues);
+      const response = await axiosInstance.post("/challan", challanValues);
+      console.log("Response:", response.data);
+      alert("Challan generated successfully");
+      
       handlePrint();
-
-      // const challanValues = modifyValues(values, studentData._id, "12");
-      // console.log("Challan Values: ", challanValues);
-      // const response = await axiosInstance.post("/challan", challanValues);
-      // console.log("Response:", response.data);
-      // alert("Challan generated successfully");
     } catch (err) {
       console.log(err);
     }

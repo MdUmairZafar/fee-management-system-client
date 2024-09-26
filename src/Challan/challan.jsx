@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
 import "./challan.css"; // Import the CSS file for styling
-import axiosInstance from "../Utils/axiosConfig";
-import { AuthContext } from "../Utils/AuthContext";
+import axiosInstance, { isTokenSet } from "../Utils/axiosConfig";
 import ChallanModal from "./ChallanModals/challanModal";
 import ChallanDataModal from "./ChallanModals/challanDataModal";
 
 const Challan = () => {
-  const { token } = useContext(AuthContext); // Retrieve token from context
+  const token = JSON.parse(localStorage.getItem("token"));
+  const user = JSON.parse(localStorage.getItem("user"));
+  console.log("User: ", user);
   const [fetchChallanData, setFetchedUserData] = useState([]); // State for fetched challan data
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -25,6 +26,8 @@ const Challan = () => {
   // Fetch challan data from the backend
   useEffect(() => {
     console.log("In useEffect");
+    console.log("Token", token);
+    console.log("isTokenSet", isTokenSet());
     const fetchChallanData = async () => {
       setLoading(true);
       setError(null);
@@ -53,8 +56,9 @@ const Challan = () => {
         setLoading(false);
       }
     };
-
-    fetchChallanData();
+    if (isTokenSet()) {
+      fetchChallanData();
+    }
   }, [
     page,
     nameQuery,
@@ -201,7 +205,10 @@ const Challan = () => {
             />
           </div>
           <div className="top-buttons">
-            <ChallanDataModal buttonName={"Edit Default Values"} />
+            <ChallanDataModal
+              isDisable={user.type !== "admin"}
+              buttonName={"Edit Default Values"}
+            />
             <ChallanModal
               buttonName={"Generate Challan"}
               close={handleModalClose}
@@ -254,6 +261,7 @@ const Challan = () => {
                 <th>Roll No</th>
                 <th>Class</th>
                 <th>Dated</th>
+                <th>Due Date</th>
                 <th>Admission Fee</th>
                 <th>Tuition Fee</th>
                 <th>General Fund</th>
@@ -294,6 +302,7 @@ const Challan = () => {
                     <td>{challan.studentId.rollNo}</td>
                     <td>{challan.studentId.class}</td>
                     <td>{new Date(challan.createdAt).toLocaleDateString()}</td>
+                    <td>{new Date(challan.dueDate).toLocaleDateString()}</td>
                     <td>{challan.admissionFee}</td>
                     <td>{challan.tuitionFee}</td>
                     <td>{challan.generalFund}</td>

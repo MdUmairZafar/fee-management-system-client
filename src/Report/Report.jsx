@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
 import "./report.css"; // Import the CSS file for styling
-import axiosInstance from "../Utils/axiosConfig";
-import { AuthContext } from "../Utils/AuthContext";
+import axiosInstance, { isTokenSet } from "../Utils/axiosConfig";
 import PrintReport from "./ReportPrint/printReport";
 
 const Report = () => {
-  const { token } = useContext(AuthContext); // Retrieve token from context
+  const token = JSON.parse(localStorage.getItem("token"));
   const [fetchChallanData, setFetchedUserData] = useState([]); // State for fetched challan data
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -57,8 +56,9 @@ const Report = () => {
         setLoading(false);
       }
     };
-
-    fetchChallanData();
+    if (isTokenSet()) {
+      fetchChallanData();
+    }
   }, [page, nameQuery, searchType, date1, date2]); // Fetch data when page, search query, search type, or date changes
 
   // Handle input change for the search field
