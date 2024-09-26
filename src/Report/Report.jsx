@@ -16,7 +16,6 @@ const Report = () => {
   const [searchTerm, setSearchTerm] = useState(""); // State for input value
   const [searchType, setSearchType] = useState("name"); // State to track the selected search type
   const [selectedRows, setSelectedRows] = useState({}); // State to track selected rows
-  const [paidRows, setPaidRows] = useState({}); // State to track paid status of rows
   const [sumData, setSumData] = useState({}); // State for summed data
 
   // Fetch challan data from the backend
@@ -164,6 +163,7 @@ const Report = () => {
                 <th>Roll No</th>
                 <th>Class</th>
                 <th>Dated</th>
+                <th>Due Date</th>
                 <th>Admission Fee</th>
                 <th>Tuition Fee</th>
                 <th>Total</th>
@@ -206,6 +206,7 @@ const Report = () => {
                     <td>{challan.studentId.rollNo}</td>
                     <td>{challan.studentId.class}</td>
                     <td>{new Date(challan.createdAt).toLocaleDateString()}</td>
+                    <td>{new Date(challan.dueDate).toLocaleDateString()}</td>
                     <td>{challan.admissionFee}</td>
                     <td>{challan.tuitionFee}</td>
                     <td>
@@ -283,6 +284,7 @@ const Report = () => {
 
             <tfoot>
               <tr>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>

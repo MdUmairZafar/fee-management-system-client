@@ -1,5 +1,9 @@
 /* src/challan.css */
 
+.print-heading {
+  height: 50px;
+}
+
 body {
   overflow-x: hidden;
   margin-left: 250px; /* Offset the content by the sidebar width */

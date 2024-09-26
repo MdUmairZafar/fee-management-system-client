@@ -47,11 +47,8 @@
 
 .challan-footer {
   margin-top: 5px;
-}
-
-.challan-footer p {
-  text-align: right;
-  margin-top: 5px;
+  display: flex;
+  justify-content: space-between;
 }
 
 /* Print-specific Styles */
@@ -64,7 +61,9 @@
     display: block;
     display: flex;
     flex-direction: row;
+    justify-content: "center";
     align-items: center;
+    margin: 0 auto;
   }
 
   @page {

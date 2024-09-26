@@ -5,7 +5,6 @@ const useFetchAllPages = (startDate = null, endDate = null) => {
   const [allData, setAllData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
 
   const fetchAllPages = async () => {
     try {
@@ -13,7 +12,7 @@ const useFetchAllPages = (startDate = null, endDate = null) => {
       setError(null);
 
       // Build the base URL with optional query parameters
-      let baseUrl = "/challan?page=1";
+      let baseUrl = "/challan?isPaid=true&page=1";
       if (startDate) {
         baseUrl += `&startDate=${startDate}`;
       }
@@ -28,7 +27,7 @@ const useFetchAllPages = (startDate = null, endDate = null) => {
 
       // Fetch remaining pages
       for (let page = 2; page <= totalPages; page++) {
-        let url = `/challan?page=${page}`;
+        let url = `/challan?isPaid=true&page=${page}`;
         if (startDate) {
           url += `&startDate=${startDate}`;
         }

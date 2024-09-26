@@ -1,5 +1,5 @@
 .print-div {
-  position: relative;
+  position: absolute;
   top: 0;
   display: none;
 }
@@ -10,58 +10,47 @@
     margin: 6mm; /* Adjust margins if necessary */
   }
 
-  body {
-    margin: 0;
-    padding: 0;
-  }
-
-  /* Ensure the print-div takes up the whole page height */
-  .print-div {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-
-  /* Table Styles */
   table {
     width: 100%;
     font-size: 10pt; /* Adjust font size if needed */
     border-collapse: collapse; /* Ensure borders are collapsed */
   }
 
+  .print-div {
+    top: 0;
+    left: 0;
+    display: block; /* or flex depending on your layout */
+  }
+
   th,
   td {
     padding: 8px;
+
     border: 1px solid black; /* Optional: adds border to table */
     text-align: left; /* Align text to the left */
   }
-
+  tfoot {
+    font-weight: bold;
+  }
   th {
     height: 50px; /* Adjust height if needed */
   }
 
-  /* Page break between the two tables */
+  .print-heading {
+    height: 40px;
+  }
   .page-break {
     page-break-after: always;
   }
 
-  /* Footer styles */
-  .footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
+  .page-footer {
+    position: relative;
     text-align: center;
-    padding: 10px;
-    font-size: 10pt;
-    background-color: #fff; /* White background to make sure it's clear */
-    border-top: 1px solid black;
+    margin-top: 20px;
+    font-size: 12px;
   }
 
-  /* Table wrapping to avoid content behind the footer */
-  .print-div {
-    min-height: 100%; /* Ensure the content takes full page height */
-    box-sizing: border-box;
-    padding-bottom: 60px; /* Leave space for the footer */
+  .page-break {
+    page-break-after: always; /* Ensures a page break after this element */
   }
 }

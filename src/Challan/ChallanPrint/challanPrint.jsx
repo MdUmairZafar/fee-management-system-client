@@ -2,7 +2,7 @@
 import React from "react";
 import "./challanPrint.css";
 
-const ChallanComponent = ({ label, challan }) => (
+const ChallanComponent = ({ label, challan, user }) => (
   <div className="challan-box">
     <h2 className="challan-header">
       GOVT. DEGREE COLLEGE (W), MUSTAFABAD, LAHORE
@@ -37,8 +37,12 @@ const ChallanComponent = ({ label, challan }) => (
     </div>
 
     <div className="challan-footer">
+      <p>
+        <strong style={{ marginRight: 4 }}>Due Date:</strong>
+        {new Date(challan.dueDate).toLocaleDateString()}
+      </p>
       <p style={{ marginRight: 20 }}>
-        <strong style={{ marginRight: 4 }}>Cashier/Clerk:</strong> Ali
+        <strong style={{ marginRight: 4 }}>Cashier/Clerk:</strong> {user}
       </p>
     </div>
   </div>
@@ -172,7 +176,7 @@ const FeeTable = ({ values }) => {
         </tr>
         <tr>
           <td>Total</td>
-          <td>{calculateTotal}</td>
+          <td>{calculateTotal()}</td>
         </tr>
       </tbody>
     </table>

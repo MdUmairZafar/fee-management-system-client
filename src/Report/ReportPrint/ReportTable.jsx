@@ -4,7 +4,6 @@ import "./printTable.css";
 const ReportTable = React.forwardRef((props, ref) => (
   <div ref={ref} className="print-div">
     <h1 className="print-heading">Classified Register</h1>
-
     {/* First half of the columns */}
     <table className="table">
       <thead>
@@ -15,6 +14,7 @@ const ReportTable = React.forwardRef((props, ref) => (
           <th>Roll No</th>
           <th>Class</th>
           <th>Dated</th>
+          <th>Due Date</th>
           <th>Admission Fee</th>
           <th>Tuition Fee</th>
           <th>Total</th>
@@ -34,6 +34,7 @@ const ReportTable = React.forwardRef((props, ref) => (
             <td>{challan.studentId.rollNo}</td>
             <td>{challan.studentId.class}</td>
             <td>{new Date(challan.updatedAt).toLocaleDateString()}</td>
+            <td>{new Date(challan.dueDate).toLocaleDateString()}</td>
             <td>{challan.admissionFee}</td>
             <td>{challan.tuitionFee}</td>
             <td>{(challan.admissionFee || 0) + (challan.tuitionFee || 0)}</td>
@@ -45,13 +46,30 @@ const ReportTable = React.forwardRef((props, ref) => (
           </tr>
         ))}
       </tbody>
+      <tfoot>
+        <tr>
+          <td>Total</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>{props.sum.tuitionFee}</td>
+          <td>{(props.sum.admissionFee || 0) + (props.sum.tuitionFee || 0)}</td>
+          <td>{props.sum.generalFund}</td>
+          <td>{props.sum.studentIdCardFund}</td>
+          <td>{props.sum.redCrossFund}</td>
+          <td>{props.sum.medicalFee}</td>
+          <td>{props.sum.studentWelfareFund}</td>
+        </tr>
+      </tfoot>
     </table>
-
-    {/* First footer */}
-    <div className="footer">Page 1 Footer - Classified Register</div>
 
     {/* CSS to force page break after this table */}
     <div className="page-break"></div>
+
+    <h1 className="print-heading">{" "}</h1>
 
     {/* Second half of the columns */}
     <table className="table">
@@ -135,10 +153,66 @@ const ReportTable = React.forwardRef((props, ref) => (
           </tr>
         ))}
       </tbody>
+      <tfoot>
+        <tr>
+          <td>{props.sum.scBreakageFund}</td>
+          <td>{props.sum.magazineFund}</td>
+          <td>{props.sum.librarySecFund}</td>
+          <td>{props.sum.boardUnivRegExamDues}</td>
+          <td>{props.sum.sportsFund}</td>
+          <td>{props.sum.miscellaneousFund}</td>
+          <td>{props.sum.boardUniProcessingFee}</td>
+          <td>{props.sum.transportFund}</td>
+          <td>{props.sum.burqaFund}</td>
+          <td>{props.sum.collegeExaminationFund}</td>
+          <td>{props.sum.computerFee}</td>
+          <td>{props.sum.secondShift}</td>
+          <td>{props.sum.fineFunds}</td>
+          <td>
+            {(props.sum.generalFund || 0) +
+              (props.sum.studentIdCardFund || 0) +
+              (props.sum.redCrossFund || 0) +
+              (props.sum.medicalFee || 0) +
+              (props.sum.studentWelfareFund || 0) +
+              (props.sum.scBreakageFund || 0) +
+              (props.sum.magazineFund || 0) +
+              (props.sum.librarySecFund || 0) +
+              (props.sum.boardUnivRegExamDues || 0) +
+              (props.sum.sportsFund || 0) +
+              (props.sum.miscellaneousFund || 0) +
+              (props.sum.boardUniProcessingFee || 0) +
+              (props.sum.transportFund || 0) +
+              (props.sum.burqaFund || 0) +
+              (props.sum.collegeExaminationFund || 0) +
+              (props.sum.computerFee || 0) +
+              (props.sum.secondShift || 0) +
+              (props.sum.fineFunds || 0)}
+          </td>
+          <td>
+            {(props.sum.admissionFee || 0) +
+              (props.sum.tuitionFee || 0) +
+              (props.sum.generalFund || 0) +
+              (props.sum.studentIdCardFund || 0) +
+              (props.sum.redCrossFund || 0) +
+              (props.sum.medicalFee || 0) +
+              (props.sum.studentWelfareFund || 0) +
+              (props.sum.scBreakageFund || 0) +
+              (props.sum.magazineFund || 0) +
+              (props.sum.librarySecFund || 0) +
+              (props.sum.boardUnivRegExamDues || 0) +
+              (props.sum.sportsFund || 0) +
+              (props.sum.miscellaneousFund || 0) +
+              (props.sum.boardUniProcessingFee || 0) +
+              (props.sum.transportFund || 0) +
+              (props.sum.burqaFund || 0) +
+              (props.sum.collegeExaminationFund || 0) +
+              (props.sum.computerFee || 0) +
+              (props.sum.secondShift || 0) +
+              (props.sum.fineFunds || 0)}
+          </td>
+        </tr>
+      </tfoot>
     </table>
-
-    {/* Second footer */}
-    <div className="footer">Page 2 Footer - Classified Register</div>
   </div>
 ));
 

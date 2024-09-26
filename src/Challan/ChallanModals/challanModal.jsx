@@ -124,15 +124,37 @@ const ChallanModal = ({
   const [open, setOpen] = useState(false);
   const [initialValues, setInitialValues] = useState(values);
   const [student, setStudent] = useState(null);
+  const [valuesForPrinting, setValuesForPrinting] = useState({});
   // to shift focus to these fields based case of student data
   const studentNameRef = useRef(null);
   const admissionFeeRef = useRef(null);
+
   const componentRef = useRef();
+  const user = JSON.parse(localStorage.getItem("user"));
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
+    onAfterPrint: () => {
+      console.log("Print completed");
+      handleClose(); // Close the modal after the print is done
+    },
   });
 
+  useEffect(() => {
+    console.log("values", values);
+    if (buttonName === "Generate Challan") {
+      getInitialValues();
+    }
+    console.log("Initial Values: ", initialValues);
+  }, []);
+
+  useEffect(() => {
+    // Check if valuesForPrinting has been set and is not empty
+    if (valuesForPrinting && Object.keys(valuesForPrinting).length > 0) {
+      console.log("Printing challan with values: ", valuesForPrinting);
+      handlePrint();
+    }
+  }, [valuesForPrinting]);
   // to get default values when generating the challan
   const getInitialValues = async () => {
     try {
@@ -181,6 +203,30 @@ const ChallanModal = ({
     return finalValues;
   };
 
+  const getModifiedValuesForPrint = () => {
+    if (valuesForPrinting) {
+      // Create a new object to hold the updated values
+      const newValues = {
+        ...valuesForPrinting, // Spread the existing values
+      };
+
+      // Convert all values to numbers where applicable
+      Object.keys(newValues).forEach((key) => {
+        const value = Number(newValues[key]);
+        if (!isNaN(value)) {
+          newValues[key] = value;
+        }
+      });
+
+      const finalValues = {
+        ...newValues,
+        dueDate: getDateThreeDaysAhead(), // Set dueDate to 3 days ahead
+      };
+      console.log("Final Values: ", finalValues);
+      return finalValues;
+    }
+  };
+
   const generateChallan = async (values) => {
     try {
       let studentData = student;
@@ -189,11 +235,11 @@ const ChallanModal = ({
         console.log("Student not found, fetching from API");
         studentData = await loadStudentData(values.rollNo);
         if (!studentData) {
-          // inserting new student
+          // Inserting new student
           const studentResponse = await axiosInstance.post("/student", {
-            rollNo: values.rollNo,
             name: values.studentName,
             fatherName: values.fatherName,
+            rollNo: values.rollNo,
             grade: values.grade,
           });
           console.log("Student Response: ", studentResponse.data);
@@ -201,17 +247,27 @@ const ChallanModal = ({
         }
       }
 
-      console.log("Vlaues: ...  ", values);
+      console.log("Values: ...  ", values);
 
-      const challanValues = modifyValues(values, studentData._id, "12");
+      const challanValues = modifyValues(values, studentData._id, user._id);
       console.log("Challan Values: ", challanValues);
+
+      // Await the response from the API call
       const response = await axiosInstance.post("/challan", challanValues);
-      console.log("Response:", response.data);
-      alert("Challan generated successfully");
-      
-      handlePrint();
+      console.log("Response:", response.data.data.challanNo);
+
+      // Set the values for printing after confirming the response
+      if (response) {
+        setValuesForPrinting({
+          ...values,
+          challanNo: response.data.data.challanNo,
+        });
+
+        alert("Challan generated successfully");
+      }
     } catch (err) {
       console.log(err);
+      alert("An error occurred while generating the challan.");
     }
   };
 
@@ -223,18 +279,11 @@ const ChallanModal = ({
       );
       console.log("Response:", response.data);
       alert("Challan updated successfully");
+      handleClose();
     } catch (err) {
       console.log(err);
     }
   };
-
-  useEffect(() => {
-    console.log("values", values);
-    if (buttonName === "Generate Challan") {
-      getInitialValues();
-    }
-    console.log("Initial Values: ", initialValues);
-  }, []);
 
   const loadStudentData = async (rollNo) => {
     try {
@@ -272,7 +321,7 @@ const ChallanModal = ({
       setStudent(studentData);
       values.studentName = studentData.name;
       values.fatherName = studentData.fatherName;
-      values.grade = studentData.grade;
+      values.grade = studentData.class;
 
       if (admissionFeeRef.current) {
         admissionFeeRef.current.focus();
@@ -292,7 +341,6 @@ const ChallanModal = ({
     } else {
       editChallan(values);
     }
-    handleClose();
   };
 
   return (
@@ -635,11 +683,26 @@ const ChallanModal = ({
                     ? "Edit Challan"
                     : "Generate Challan"}
                 </Button>
-                <div className="print-challan-div" ref={componentRef}>
-                  <ChallanComponent challan={values} label={"Bank"} />
-                  <ChallanComponent challan={values} label={"Student"} />
-                  <ChallanComponent challan={values} label={"College"} />
-                </div>
+                {valuesForPrinting &&
+                  Object.keys(valuesForPrinting).length > 0 && (
+                    <div className="print-challan-div" ref={componentRef}>
+                      <ChallanComponent
+                        challan={getModifiedValuesForPrint()}
+                        label={"Bank"}
+                        user={user.name}
+                      />
+                      <ChallanComponent
+                        challan={getModifiedValuesForPrint()}
+                        label={"Student"}
+                        user={user.name}
+                      />
+                      <ChallanComponent
+                        challan={getModifiedValuesForPrint()}
+                        label={"College"}
+                        user={user.name}
+                      />
+                    </div>
+                  )}
               </Form>
             )}
           </Formik>
