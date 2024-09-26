@@ -39,7 +39,7 @@ const Report = () => {
           date1 || date2 ? `&startDate=${startDate}&endDate=${endDate}` : "";
         const [response, sumResponse] = await Promise.all([
           axiosInstance.get(
-            `/challan?page=${page}&${queryParam}${dateRangeParam}&limit=10`
+            `/challan?isPaid=true&page=${page}&${queryParam}${dateRangeParam}&limit=10`
           ),
           axiosInstance.get(`/challan/sum?${dateRangeParam}`),
         ]); // Update endpoint with search and pagination
@@ -99,17 +99,6 @@ const Report = () => {
       ...prevSelected,
       [id]: !prevSelected[id],
     }));
-  };
-
-  // Mark selected challans as paid
-  const markChallansAsPaid = () => {
-    const updatedPaidRows = { ...paidRows };
-    Object.keys(selectedRows).forEach((id) => {
-      if (selectedRows[id]) {
-        updatedPaidRows[id] = true;
-      }
-    });
-    setPaidRows(updatedPaidRows);
   };
 
   // Display loading or error states
@@ -197,8 +186,8 @@ const Report = () => {
                 <th>2nd Shift</th>
                 <th>Fine Funds</th>
                 <th>Total</th>
+                <th>Payment</th>
                 <th>Grand Total</th>
-                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -260,6 +249,7 @@ const Report = () => {
                         (challan.secondShift || 0) +
                         (challan.fineFunds || 0)}
                     </td>
+                    <td>{challan.isPaid ? "Paid" : "Pending"}</td>
                     <td>
                       {(challan.admissionFee || 0) +
                         (challan.tuitionFee || 0) +
@@ -281,10 +271,6 @@ const Report = () => {
                         (challan.computerFee || 0) +
                         (challan.secondShift || 0) +
                         (challan.fineFunds || 0)}
-                    </td>
-                    {/* Action Cell */}
-                    <td className="action-cell">
-                      {paidRows[challan._id] ? "Paid" : "Pending"}
                     </td>
                   </tr>
                 ))

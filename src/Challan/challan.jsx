@@ -282,8 +282,8 @@ const Challan = () => {
                 <th>Computer Fee</th>
                 <th>2nd Shift</th>
                 <th>Fine Funds</th>
+                <th>Payment</th>
                 <th>Grand Total</th>
-                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -323,8 +323,29 @@ const Challan = () => {
                     <td>{challan.computerFee}</td>
                     <td>{challan.secondShift}</td>
                     <td>{challan.fineFunds}</td>
-                    <td>{challan.grandTotal}</td>
                     <td>{challan.isPaid ? "Paid" : "Pending"}</td>
+                    <td>
+                      {(challan.admissionFee || 0) +
+                        (challan.tuitionFee || 0) +
+                        (challan.generalFund || 0) +
+                        (challan.studentIdCardFund || 0) +
+                        (challan.redCrossFund || 0) +
+                        (challan.medicalFee || 0) +
+                        (challan.studentWelfareFund || 0) +
+                        (challan.scBreakageFund || 0) +
+                        (challan.magazineFund || 0) +
+                        (challan.librarySecFund || 0) +
+                        (challan.boardUnivRegExamDues || 0) +
+                        (challan.sportsFund || 0) +
+                        (challan.miscellaneousFund || 0) +
+                        (challan.boardUniProcessingFee || 0) +
+                        (challan.transportFund || 0) +
+                        (challan.burqaFund || 0) +
+                        (challan.collegeExaminationFund || 0) +
+                        (challan.computerFee || 0) +
+                        (challan.secondShift || 0) +
+                        (challan.fineFunds || 0)}
+                    </td>
                   </tr>
                 ))
               ) : (

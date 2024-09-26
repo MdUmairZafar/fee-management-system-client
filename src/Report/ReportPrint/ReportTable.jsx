@@ -4,6 +4,7 @@ import "./printTable.css";
 const ReportTable = React.forwardRef((props, ref) => (
   <div ref={ref} className="print-div">
     <h1 className="print-heading">Classified Register</h1>
+
     {/* First half of the columns */}
     <table className="table">
       <thead>
@@ -45,6 +46,9 @@ const ReportTable = React.forwardRef((props, ref) => (
         ))}
       </tbody>
     </table>
+
+    {/* First footer */}
+    <div className="footer">Page 1 Footer - Classified Register</div>
 
     {/* CSS to force page break after this table */}
     <div className="page-break"></div>
@@ -132,6 +136,9 @@ const ReportTable = React.forwardRef((props, ref) => (
         ))}
       </tbody>
     </table>
+
+    {/* Second footer */}
+    <div className="footer">Page 2 Footer - Classified Register</div>
   </div>
 ));
 
