@@ -284,6 +284,7 @@ const Challan = () => {
                 <th>Fine Funds</th>
                 <th>Payment</th>
                 <th>Grand Total</th>
+                <th>Created By</th>
               </tr>
             </thead>
             <tbody>
@@ -346,6 +347,7 @@ const Challan = () => {
                         (challan.secondShift || 0) +
                         (challan.fineFunds || 0)}
                     </td>
+                    <td>{challan.userId.name}</td>
                   </tr>
                 ))
               ) : (

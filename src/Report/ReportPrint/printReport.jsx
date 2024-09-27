@@ -15,7 +15,9 @@ const PrintReport = ({ startDate, endDate }) => {
     const getSum = async () => {
       console.log("Fetching sum...");
       try {
-        const response = await axiosInstance.get("/challan/sum");
+        const response = await axiosInstance.get(
+          `/challan/sum?startDate=${startDate}&endDate=${endDate}`
+        );
         console.log("Sum response:", response.data.data);
         setSum(response.data.data);
       } catch (e) {
@@ -39,45 +41,6 @@ const PrintReport = ({ startDate, endDate }) => {
             )}
             content={() => componentRef.current}
             pageStyle="@page { size: A4 landscape; }" // Print in landscape mode
-            // onBeforeGetContent={() => {
-            //   const tables = componentRef.current.querySelectorAll(".table");
-
-            //   tables.forEach((tab) => {
-            //     let currentPageNumber = 1;
-            //     const rows = tab.querySelectorAll("tr");
-            //     console.log("Rows:", rows.length);
-            //     const rowsPerPage = 20; // Adjust this value based on your layout
-            //     let pageCount = Math.ceil(rows.length / rowsPerPage);
-
-            //     for (let i = 0; i < pageCount; i++) {
-            //       // Create footer
-            //       const footer = document.createElement("div");
-            //       footer.className = "page-footer";
-            //       footer.innerHTML = `Page ${currentPageNumber}`;
-
-            //       // Locate the <tfoot> in the table
-            //       const tfoot = tab.querySelector("tfoot");
-
-            //       // Insert footer after <tfoot>
-            //       if (tfoot) {
-            //         // Insert after tfoot, not before
-            //         tfoot.parentNode.insertBefore(footer, tfoot.nextSibling);
-            //       } else {
-            //         // Fallback in case <tfoot> is not found, insert after table
-            //         tab.parentNode.insertBefore(footer, tab.nextSibling);
-            //       }
-
-            //       currentPageNumber++; // Increment page number for each new page
-
-            //       // Add page break after each page
-            //       if (i < pageCount - 1) {
-            //         const pageBreak = document.createElement("div");
-            //         pageBreak.className = "page-break";
-            //         tab.appendChild(pageBreak); // Insert page break within the table
-            //       }
-            //     }
-            //   });
-            // }}
           />
           {sum ? (
             <ReportTable ref={componentRef} data={allData} sum={sum} />

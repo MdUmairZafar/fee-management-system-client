@@ -17,10 +17,11 @@ const Report = () => {
   const [searchType, setSearchType] = useState("name"); // State to track the selected search type
   const [selectedRows, setSelectedRows] = useState({}); // State to track selected rows
   const [sumData, setSumData] = useState({}); // State for summed data
+  const [pageTotal, setPageTotal] = useState({});
 
   // Fetch challan data from the backend
   useEffect(() => {
-    const fetchChallanData = async () => {
+    const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
@@ -48,6 +49,7 @@ const Report = () => {
         setFetchedUserData(response.data.data);
         setTotalPages(response.data.totalPages); // Set total pages from response
         setSumData(sumResponse.data.data);
+        calculatePageTotals(response.data.data);
       } catch (error) {
         console.error("Error fetching challan data:", error);
         setError("Failed to fetch challan data. Please try again.");
@@ -56,7 +58,7 @@ const Report = () => {
       }
     };
     if (isTokenSet()) {
-      fetchChallanData();
+      fetchData();
     }
   }, [page, nameQuery, searchType, date1, date2]); // Fetch data when page, search query, search type, or date changes
 
@@ -99,6 +101,64 @@ const Report = () => {
       [id]: !prevSelected[id],
     }));
   };
+  const calculatePageTotals = (data) => {
+    console.log("fetch challan data", fetchChallanData);
+    // Assuming each record is an object containing all fee fields
+    const totals = {
+      admissionFee: 0,
+      tuitionFee: 0,
+      total: 0,
+      generalFund: 0,
+      studentIdCardFund: 0,
+      redCrossFund: 0,
+      medicalFee: 0,
+      studentWelfareFund: 0,
+      scBreakageFund: 0,
+      magazineFund: 0,
+      librarySecFund: 0,
+      boardExamDues: 0,
+      sportsFund: 0,
+      miscellaneousFund: 0,
+      processingFee: 0,
+      transportFund: 0,
+      burqaFund: 0,
+      collegeExamFund: 0,
+      computerFee: 0,
+      secondShift: 0,
+      fineFunds: 0,
+      payment: 0,
+      grandTotal: 0,
+    };
+
+    // Loop through each record on the current page
+    data.forEach((record) => {
+      totals.admissionFee += record.admissionFee || 0;
+      totals.tuitionFee += record.tuitionFee || 0;
+      totals.total += record.total || 0;
+      totals.generalFund += record.generalFund || 0;
+      totals.studentIdCardFund += record.studentIdCardFund || 0;
+      totals.redCrossFund += record.redCrossFund || 0;
+      totals.medicalFee += record.medicalFee || 0;
+      totals.studentWelfareFund += record.studentWelfareFund || 0;
+      totals.scBreakageFund += record.scBreakageFund || 0;
+      totals.magazineFund += record.magazineFund || 0;
+      totals.librarySecFund += record.librarySecFund || 0;
+      totals.boardExamDues += record.boardExamDues || 0;
+      totals.sportsFund += record.sportsFund || 0;
+      totals.miscellaneousFund += record.miscellaneousFund || 0;
+      totals.processingFee += record.processingFee || 0;
+      totals.transportFund += record.transportFund || 0;
+      totals.burqaFund += record.burqaFund || 0;
+      totals.collegeExamFund += record.collegeExamFund || 0;
+      totals.computerFee += record.computerFee || 0;
+      totals.secondShift += record.secondShift || 0;
+      totals.fineFunds += record.fineFunds || 0;
+      totals.payment += record.payment || 0;
+      totals.grandTotal += record.grandTotal || 0;
+    });
+    console.log("hu" + totals);
+    setPageTotal(totals);
+  };
 
   // Display loading or error states
   if (loading) return <p>Loading...</p>;
@@ -131,7 +191,12 @@ const Report = () => {
             />
           </div>
           <div className="top-buttons">
-            <PrintReport />
+            <PrintReport
+              startDate={
+                date1 || new Date("1900-01-01").toISOString().split("T")[0]
+              }
+              endDate={date2 || new Date().toISOString().split("T")[0]}
+            />
 
             {/* Date Pickers */}
             <div className="date-picker">
@@ -284,7 +349,9 @@ const Report = () => {
 
             <tfoot>
               <tr>
-                <td></td>
+                <td>
+                  <b>Total</b>
+                </td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -292,117 +359,244 @@ const Report = () => {
                 <td></td>
                 <td></td>
                 <td>
-                  <b>{sumData.admissionFee}</b>
+                  <b>{pageTotal.admissionFee}</b>
                 </td>
                 <td>
-                  <b>{sumData.tuitionFee}</b>
+                  <b>{pageTotal.tuitionFee}</b>
                 </td>
                 <td>
                   <b>
-                    {(sumData.admissionFee || 0) + (sumData.tuitionFee || 0)}
+                    {(pageTotal.admissionFee || 0) +
+                      (pageTotal.tuitionFee || 0)}
                   </b>
                 </td>
                 <td>
-                  <b>{sumData.generalFund}</b>
+                  <b>{pageTotal.generalFund}</b>
                 </td>
                 <td>
-                  <b>{sumData.studentIdCardFund}</b>
+                  <b>{pageTotal.studentIdCardFund}</b>
                 </td>
                 <td>
-                  <b>{sumData.redCrossFund}</b>
+                  <b>{pageTotal.redCrossFund}</b>
                 </td>
                 <td>
-                  <b>{sumData.medicalFee}</b>
+                  <b>{pageTotal.medicalFee}</b>
                 </td>
                 <td>
-                  <b>{sumData.studentWelfareFund}</b>
+                  <b>{pageTotal.studentWelfareFund}</b>
                 </td>
                 <td>
-                  <b>{sumData.scBreakageFund}</b>
+                  <b>{pageTotal.scBreakageFund}</b>
                 </td>
                 <td>
-                  <b>{sumData.magazineFund}</b>
+                  <b>{pageTotal.magazineFund}</b>
                 </td>
                 <td>
-                  <b>{sumData.librarySecFund}</b>
+                  <b>{pageTotal.librarySecFund}</b>
                 </td>
                 <td>
-                  <b>{sumData.boardUnivRegExamDues}</b>
+                  <b>{pageTotal.boardUnivRegExamDues}</b>
                 </td>
                 <td>
-                  <b>{sumData.sportsFund}</b>
+                  <b>{pageTotal.sportsFund}</b>
                 </td>
                 <td>
-                  <b>{sumData.miscellaneousFund}</b>
+                  <b>{pageTotal.miscellaneousFund}</b>
                 </td>
                 <td>
-                  <b>{sumData.boardUniProcessingFee}</b>
+                  <b>{pageTotal.boardUniProcessingFee}</b>
                 </td>
                 <td>
-                  <b>{sumData.transportFund}</b>
+                  <b>{pageTotal.transportFund}</b>
                 </td>
                 <td>
-                  <b>{sumData.burqaFund}</b>
+                  <b>{pageTotal.burqaFund}</b>
                 </td>
                 <td>
-                  <b>{sumData.collegeExaminationFund}</b>
+                  <b>{pageTotal.collegeExaminationFund}</b>
                 </td>
                 <td>
-                  <b>{sumData.computerFee}</b>
+                  <b>{pageTotal.computerFee}</b>
                 </td>
                 <td>
-                  <b>{sumData.secondShiftFee}</b>
+                  <b>{pageTotal.secondShiftFee}</b>
                 </td>
                 <td>
-                  <b>{sumData.fineFunds}</b>
+                  <b>{pageTotal.fineFunds}</b>
                 </td>
                 <td>
                   <b>
-                    {(sumData.generalFund || 0) +
-                      (sumData.studentIdCardFund || 0) +
-                      (sumData.redCrossFund || 0) +
-                      (sumData.medicalFee || 0) +
-                      (sumData.studentWelfareFund || 0) +
-                      (sumData.scBreakageFund || 0) +
-                      (sumData.magazineFund || 0) +
-                      (sumData.librarySecFund || 0) +
-                      (sumData.boardUnivRegExamDues || 0) +
-                      (sumData.sportsFund || 0) +
-                      (sumData.miscellaneousFund || 0) +
-                      (sumData.boardUniProcessingFee || 0) +
-                      (sumData.transportFund || 0) +
-                      (sumData.burqaFund || 0) +
-                      (sumData.collegeExaminationFund || 0) +
-                      (sumData.computerFee || 0) +
-                      (sumData.secondShift || 0) +
-                      (sumData.fineFunds || 0)}
+                    {(pageTotal.generalFund || 0) +
+                      (pageTotal.studentIdCardFund || 0) +
+                      (pageTotal.redCrossFund || 0) +
+                      (pageTotal.medicalFee || 0) +
+                      (pageTotal.studentWelfareFund || 0) +
+                      (pageTotal.scBreakageFund || 0) +
+                      (pageTotal.magazineFund || 0) +
+                      (pageTotal.librarySecFund || 0) +
+                      (pageTotal.boardUnivRegExamDues || 0) +
+                      (pageTotal.sportsFund || 0) +
+                      (pageTotal.miscellaneousFund || 0) +
+                      (pageTotal.boardUniProcessingFee || 0) +
+                      (pageTotal.transportFund || 0) +
+                      (pageTotal.burqaFund || 0) +
+                      (pageTotal.collegeExaminationFund || 0) +
+                      (pageTotal.computerFee || 0) +
+                      (pageTotal.secondShift || 0) +
+                      (pageTotal.fineFunds || 0)}
                   </b>
                 </td>
+                <td></td>
                 <td>
                   <b>
-                    {sumData.admissionFee +
-                      sumData.tuitionFee +
-                      (sumData.generalFund || 0) +
-                      (sumData.studentIdCardFund || 0) +
-                      (sumData.redCrossFund || 0) +
-                      (sumData.medicalFee || 0) +
-                      (sumData.studentWelfareFund || 0) +
-                      (sumData.scBreakageFund || 0) +
-                      (sumData.magazineFund || 0) +
-                      (sumData.librarySecFund || 0) +
-                      (sumData.boardUnivRegExamDues || 0) +
-                      (sumData.sportsFund || 0) +
-                      (sumData.miscellaneousFund || 0) +
-                      (sumData.boardUniProcessingFee || 0) +
-                      (sumData.transportFund || 0) +
-                      (sumData.burqaFund || 0) +
-                      (sumData.collegeExaminationFund || 0) +
-                      (sumData.computerFee || 0) +
-                      (sumData.secondShift || 0) +
-                      (sumData.fineFunds || 0)}
+                    {pageTotal.admissionFee +
+                      pageTotal.tuitionFee +
+                      (pageTotal.generalFund || 0) +
+                      (pageTotal.studentIdCardFund || 0) +
+                      (pageTotal.redCrossFund || 0) +
+                      (pageTotal.medicalFee || 0) +
+                      (pageTotal.studentWelfareFund || 0) +
+                      (pageTotal.scBreakageFund || 0) +
+                      (pageTotal.magazineFund || 0) +
+                      (pageTotal.librarySecFund || 0) +
+                      (pageTotal.boardUnivRegExamDues || 0) +
+                      (pageTotal.sportsFund || 0) +
+                      (pageTotal.miscellaneousFund || 0) +
+                      (pageTotal.boardUniProcessingFee || 0) +
+                      (pageTotal.transportFund || 0) +
+                      (pageTotal.burqaFund || 0) +
+                      (pageTotal.collegeExaminationFund || 0) +
+                      (pageTotal.computerFee || 0) +
+                      (pageTotal.secondShift || 0) +
+                      (pageTotal.fineFunds || 0)}
                   </b>
                 </td>
               </tr>
+
+              {totalPages === page ? (
+                <tr>
+                  <td>
+                    <b>Grand Total</b>
+                  </td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td>
+                    <b>{sumData.admissionFee}</b>
+                  </td>
+                  <td>
+                    <b>{sumData.tuitionFee}</b>
+                  </td>
+                  <td>
+                    <b>
+                      {(sumData.admissionFee || 0) + (sumData.tuitionFee || 0)}
+                    </b>
+                  </td>
+                  <td>
+                    <b>{sumData.generalFund}</b>
+                  </td>
+                  <td>
+                    <b>{sumData.studentIdCardFund}</b>
+                  </td>
+                  <td>
+                    <b>{sumData.redCrossFund}</b>
+                  </td>
+                  <td>
+                    <b>{sumData.medicalFee}</b>
+                  </td>
+                  <td>
+                    <b>{sumData.studentWelfareFund}</b>
+                  </td>
+                  <td>
+                    <b>{sumData.scBreakageFund}</b>
+                  </td>
+                  <td>
+                    <b>{sumData.magazineFund}</b>
+                  </td>
+                  <td>
+                    <b>{sumData.librarySecFund}</b>
+                  </td>
+                  <td>
+                    <b>{sumData.boardUnivRegExamDues}</b>
+                  </td>
+                  <td>
+                    <b>{sumData.sportsFund}</b>
+                  </td>
+                  <td>
+                    <b>{sumData.miscellaneousFund}</b>
+                  </td>
+                  <td>
+                    <b>{sumData.boardUniProcessingFee}</b>
+                  </td>
+                  <td>
+                    <b>{sumData.transportFund}</b>
+                  </td>
+                  <td>
+                    <b>{sumData.burqaFund}</b>
+                  </td>
+                  <td>
+                    <b>{sumData.collegeExaminationFund}</b>
+                  </td>
+                  <td>
+                    <b>{sumData.computerFee}</b>
+                  </td>
+                  <td>
+                    <b>{sumData.secondShiftFee}</b>
+                  </td>
+                  <td>
+                    <b>{sumData.fineFunds}</b>
+                  </td>
+                  <td>
+                    <b>
+                      {(sumData.generalFund || 0) +
+                        (sumData.studentIdCardFund || 0) +
+                        (sumData.redCrossFund || 0) +
+                        (sumData.medicalFee || 0) +
+                        (sumData.studentWelfareFund || 0) +
+                        (sumData.scBreakageFund || 0) +
+                        (sumData.magazineFund || 0) +
+                        (sumData.librarySecFund || 0) +
+                        (sumData.boardUnivRegExamDues || 0) +
+                        (sumData.sportsFund || 0) +
+                        (sumData.miscellaneousFund || 0) +
+                        (sumData.boardUniProcessingFee || 0) +
+                        (sumData.transportFund || 0) +
+                        (sumData.burqaFund || 0) +
+                        (sumData.collegeExaminationFund || 0) +
+                        (sumData.computerFee || 0) +
+                        (sumData.secondShift || 0) +
+                        (sumData.fineFunds || 0)}
+                    </b>
+                  </td>
+                  <td>
+                    <b>
+                      {sumData.admissionFee +
+                        sumData.tuitionFee +
+                        (sumData.generalFund || 0) +
+                        (sumData.studentIdCardFund || 0) +
+                        (sumData.redCrossFund || 0) +
+                        (sumData.medicalFee || 0) +
+                        (sumData.studentWelfareFund || 0) +
+                        (sumData.scBreakageFund || 0) +
+                        (sumData.magazineFund || 0) +
+                        (sumData.librarySecFund || 0) +
+                        (sumData.boardUnivRegExamDues || 0) +
+                        (sumData.sportsFund || 0) +
+                        (sumData.miscellaneousFund || 0) +
+                        (sumData.boardUniProcessingFee || 0) +
+                        (sumData.transportFund || 0) +
+                        (sumData.burqaFund || 0) +
+                        (sumData.collegeExaminationFund || 0) +
+                        (sumData.computerFee || 0) +
+                        (sumData.secondShift || 0) +
+                        (sumData.fineFunds || 0)}
+                    </b>
+                  </td>
+                </tr>
+              ) : null}
             </tfoot>
           </table>
         </div>
