@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axiosInstance from "./axiosConfig";
 
 const useFetchAllPages = (startDate = null, endDate = null) => {
-  const [allData, setAllData] = useState([]);
+  const [allData, setAllData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -11,8 +11,8 @@ const useFetchAllPages = (startDate = null, endDate = null) => {
       setLoading(true);
       setError(null);
 
-      // Build the base URL with optional query parameters
-      let baseUrl = "/challan?isPaid=true&page=1";
+      // Build the base URL with optional query parameters, limit set to 25
+      let baseUrl = "/challan?isPaid=true&page=1&limit=25";
       if (startDate) {
         baseUrl += `&startDate=${startDate}`;
       }
@@ -20,14 +20,16 @@ const useFetchAllPages = (startDate = null, endDate = null) => {
         baseUrl += `&endDate=${endDate}`;
       }
 
-      // Fetch first page and determine total pages
+      // Fetch first page and determine total pages (capped at 25)
       const firstPageResponse = await axiosInstance.get(baseUrl);
-      const totalPages = firstPageResponse.data.totalPages; // Assuming `totalPages` is returned
-      let allData = firstPageResponse.data.data;
+      const totalPages = Math.min(firstPageResponse.data.totalPages, 25); // Limit to 25 pages
+      let dataByPages = {
+        1: firstPageResponse.data.data, // Store first page data
+      };
 
-      // Fetch remaining pages
+      // Fetch remaining pages up to the limit of 25 pages
       for (let page = 2; page <= totalPages; page++) {
-        let url = `/challan?isPaid=true&page=${page}`;
+        let url = `/challan?isPaid=true&page=${page}&limit=25`;
         if (startDate) {
           url += `&startDate=${startDate}`;
         }
@@ -36,10 +38,10 @@ const useFetchAllPages = (startDate = null, endDate = null) => {
         }
 
         const response = await axiosInstance.get(url);
-        allData = [...allData, ...response.data.data];
+        dataByPages[page] = response.data.data; // Store each page data by page number
       }
 
-      setAllData(allData);
+      setAllData(dataByPages);
     } catch (err) {
       console.error("Error fetching all data:", err);
       setError(err);
@@ -51,7 +53,7 @@ const useFetchAllPages = (startDate = null, endDate = null) => {
   useEffect(() => {
     fetchAllPages();
   }, [startDate, endDate]); // Re-fetch data when dates change
-
+  console.log("All data:", allData);
   return { allData, loading, error };
 };
 
