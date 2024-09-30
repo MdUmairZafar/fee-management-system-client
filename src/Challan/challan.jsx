@@ -157,6 +157,7 @@ const Challan = () => {
         }
       );
       console.log("Response:", response);
+      alert("Challan successfully paid");
       setTrigger(!trigger); // Trigger re-fetching data
     } else {
       console.log("No row selected");
@@ -173,6 +174,41 @@ const Challan = () => {
       fatherName: studentId.fatherName,
       studentId: studentId._id,
     };
+  };
+
+  const deleteChallan = async () => {
+    if (selectedRowData) {
+      console.log("Selected Row Data:", selectedRowData);
+
+      // Confirm before deletion
+      const confirmDelete = window.confirm(
+        "Are you sure you want to delete this challan?"
+      );
+      if (!confirmDelete) {
+        return;
+      }
+
+      try {
+        // Send delete request to the backend
+        console.log("Selected Row Data:", selectedRowData._id);
+        const id = selectedRowData._id.trim();
+        const response = await axiosInstance.delete(`/challan/${id}`);
+        console.log("Delete Response:", response);
+        if (response.status === 200 || response.status === 204) {
+          alert("Challan deleted successfully.");
+        } else {
+          alert("An error occured while deleting.");
+        }
+
+        // Trigger a re-fetching of data or update the UI accordingly
+        setTrigger(!trigger); // This assumes you're using trigger to refetch data
+      } catch (error) {
+        console.error("Error deleting challan:", error);
+        alert("An error occurred while deleting the challan.");
+      }
+    } else {
+      console.log("No row selected");
+    }
   };
 
   // Display loading or error states
@@ -193,6 +229,9 @@ const Challan = () => {
               <option value="name">Name</option>
               <option value="challanNo">Challan No</option>
             </select>
+            <button onClick={deleteChallan} className="delete-button">
+              delete
+            </button>
             <input
               type="search"
               name="search-field"

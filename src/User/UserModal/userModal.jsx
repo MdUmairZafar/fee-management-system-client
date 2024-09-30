@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Box, TextField, Button, alpha } from "@mui/material";
+import {
+  Modal,
+  Box,
+  TextField,
+  Button,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import "../user.css";
@@ -105,7 +114,7 @@ const UserModal = ({
             validationSchema={validationSchema}
             onSubmit={onSubmit}
           >
-            {({ errors, touched }) => (
+            {({ errors, touched, values, handleChange }) => (
               <Form>
                 <Field
                   as={TextField}
@@ -151,16 +160,25 @@ const UserModal = ({
                   helperText={<ErrorMessage name="password" />}
                 />
 
-                <Field
-                  as={TextField}
-                  label="Type"
-                  name="type"
-                  fullWidth
-                  margin="normal"
-                  variant="outlined"
-                  error={touched.type && !!errors.type}
-                  helperText={<ErrorMessage name="type" />}
-                />
+                <FormControl fullWidth margin="normal" variant="outlined">
+                  <InputLabel>Type</InputLabel>
+                  <Select
+                    name="type"
+                    value={values.type}
+                    onChange={handleChange}
+                    error={touched.type && !!errors.type}
+                    label="Type"
+                  >
+                    <MenuItem value="admin">Admin</MenuItem>
+                    <MenuItem value="fee clerk">Fee Clerk</MenuItem>
+                    <MenuItem value="head clerk">Head Clerk</MenuItem>
+                  </Select>
+                  <ErrorMessage
+                    name="type"
+                    component="div"
+                    style={{ color: "red", fontSize: "12px" }}
+                  />
+                </FormControl>
 
                 <Button type="submit" variant="contained" color="primary">
                   {buttonName === "Create User" ? "Create" : "Update"}

@@ -5,6 +5,19 @@ body {
   margin-left: 250px; /* Offset the content by the sidebar width */
   padding: 20px;
 }
+.delete-button {
+  padding: 10px 20px;
+  background-color: #db3434;
+  margin-right: 10px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.delete-button:hover {
+  background-color: #a32929;
+}
 
 .challan-container {
   padding: 20px;

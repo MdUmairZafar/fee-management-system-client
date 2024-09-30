@@ -11,6 +11,7 @@ const User = () => {
   const [error, setError] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [trigger, setTrigger] = useState(false);
 
   // Fetch user-specific data from the backend
   useEffect(() => {
@@ -33,7 +34,7 @@ const User = () => {
       // Fetch data on component mount
       fetchUserData();
     }
-  }, [selectedUser, modalOpen]);
+  }, [selectedUser, modalOpen, trigger]);
 
   const handleModalClose = () => {
     setModalOpen(!modalOpen); // This will trigger a re-render
@@ -48,6 +49,41 @@ const User = () => {
     }
   };
 
+  const deleteUser = async () => {
+    if (selectedUser) {
+      console.log("Selected Row Data:", selectedUser);
+
+      // Confirm before deletion
+      const confirmDelete = window.confirm(
+        "Are you sure you want to delete user?"
+      );
+      if (!confirmDelete) {
+        return;
+      }
+
+      try {
+        // Send delete request to the backend
+        const id = selectedUser._id.trim();
+        const response = await axiosInstance.delete(`/user/${id}`);
+        console.log("Delete Response:", response);
+
+        if (response.status === 200 || response.status === 204) {
+          alert("User deleted successfully.");
+
+          setTrigger(!trigger); // Trigger a re-render to fetch updated data
+
+          // Clear the selected user after deletion
+        }
+      } catch (error) {
+        console.error("Error deleting user:", error);
+        alert("An error occurred while deleting the user. Please try again.");
+      }
+    } else {
+      console.log("No row selected");
+      alert("Please select a user to delete.");
+    }
+  };
+
   // Display loading or error states
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="error-message">{error}</p>;
@@ -56,6 +92,9 @@ const User = () => {
     <div className="challan-container">
       <div className="table-container">
         <div className="top-bar-user">
+          <button onClick={deleteUser} className="delete-button">
+            delete
+          </button>
           <UserModal buttonName="Create User" close={handleModalClose} />
           {selectedUser ? (
             <UserModal

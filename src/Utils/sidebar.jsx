@@ -7,6 +7,7 @@ const SideBar = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   console.log("User: ", user);
   const isAdmin = user.type === "admin";
+  const isHead = user.type === "head clerk";
   return (
     <div className="sidebar">
       {/* Logo */}
@@ -34,8 +35,8 @@ const SideBar = () => {
         </button>
         <button
           onClick={() => navigate("/report", { replace: true })}
-          className={isAdmin ? "sidebar-button" : "sidebar-button-disabled"}
-          disabled={!isAdmin}
+          className={(isAdmin || isHead) ? "sidebar-button" : "sidebar-button-disabled"}
+          disabled={!(isAdmin || isHead)}
         >
           Reports
         </button>
