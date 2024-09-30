@@ -1,66 +1,35 @@
 import React from "react";
 import "./printTable.css";
 
-const ReportTable = React.forwardRef((props, ref) => (
+const ClassifiedCashBook = React.forwardRef((props, ref) => (
   <div ref={ref} className="print-div">
     {Object.keys(props.data).map((pageIndex) => (
       <div key={pageIndex}>
         {/* First half of the columns */}
         <table className="table">
-          <thead>
-            <tr>
-              <th>Sr. No</th>
-              <th>Challan No</th>
-              <th>Name</th>
-              <th>D/O</th>
-              <th>Roll No</th>
-              <th>Class</th>
-              <th>Dated</th>
-              <th>Due Date</th>
-              <th>Admission Fee</th>
-              <th>Tuition Fee</th>
-              <th>Total</th>
-              <th>General Fund</th>
-              <th>Student I.D Card Fund</th>
-              <th>Red Cross Fund</th>
-              <th>Medical Fund</th>
-              <th>Student Welfare Fund</th>
-            </tr>
-          </thead>
-          <tbody>
-            {props.data[pageIndex].data.map((challan, index) => (
-              <tr key={index}>
-                <td>{index + 1 + (pageIndex - 1) * 25}</td>
-                <td>{challan.challanNo}</td>
-                <td>{challan.studentId.name}</td>
-                <td>{challan.studentId.fatherName}</td>
-                <td>{challan.studentId.rollNo}</td>
-                <td>{challan.studentId.class}</td>
-                <td>{new Date(challan.updatedAt).toLocaleDateString()}</td>
-                <td>{new Date(challan.dueDate).toLocaleDateString()}</td>
-                <td>{challan.admissionFee}</td>
-                <td>{challan.tuitionFee}</td>
-                <td>
-                  {(challan.admissionFee || 0) + (challan.tuitionFee || 0)}
-                </td>
-                <td>{challan.generalFund}</td>
-                <td>{challan.studentIdCardFund}</td>
-                <td>{challan.redCrossFund}</td>
-                <td>{challan.medicalFee}</td>
-                <td>{challan.studentWelfareFund}</td>
+          {(pageIndex == 1 || pageIndex % 21 == 0) && (
+            <thead>
+              <tr>
+                <th>Classified Register Page No.</th>
+                <th>Dated</th>
+                <th>Admission Fee</th>
+                <th>Tuition Fee</th>
+                <th>Gov. Dues Total</th>
+                <th>General Fund</th>
+                <th>Student I.D Card Fund</th>
+                <th>Red Cross Fund</th>
+                <th>Medical Fund</th>
+                <th>Student Welfare Fund</th>
+                <th>Sc. Breakage Fund</th>
+                <th>Magazine Fund</th>
+                <th>Library Sec Fund</th>
               </tr>
-            ))}
-          </tbody>
-          <tfoot>
+            </thead>
+          )}
+          <tbody>
             <tr>
-              <td>Total</td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
+              <td>{pageIndex}</td>
+              <td>date</td>
               <td>{props.data[pageIndex].sum.admissionFee}</td>
               <td>{props.data[pageIndex].sum.tuitionFee}</td>
               <td>
@@ -72,16 +41,15 @@ const ReportTable = React.forwardRef((props, ref) => (
               <td>{props.data[pageIndex].sum.redCrossFund}</td>
               <td>{props.data[pageIndex].sum.medicalFee}</td>
               <td>{props.data[pageIndex].sum.studentWelfareFund}</td>
+              <td>{props.data[pageIndex].sum.scBreakageFund}</td>
+              <td>{props.data[pageIndex].sum.magazineFund}</td>
+              <td>{props.data[pageIndex].sum.librarySecFund}</td>
             </tr>
-            {Object.keys(props.data).length == pageIndex ? (
+          </tbody>
+          <tfoot>
+            {Object.keys(props.data).length == pageIndex && (
               <tr>
-                <td height={20}>Final</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td> Total</td>
                 <td></td>
                 <td>{props.sum.admissionFee}</td>
                 <td>{props.sum.tuitionFee}</td>
@@ -93,99 +61,50 @@ const ReportTable = React.forwardRef((props, ref) => (
                 <td>{props.sum.redCrossFund}</td>
                 <td>{props.sum.medicalFee}</td>
                 <td>{props.sum.studentWelfareFund}</td>
+                <td>{props.sum.scBreakageFund}</td>
+                <td>{props.sum.magazineFund}</td>
+                <td>{props.sum.librarySecFund}</td>
               </tr>
-            ) : null}
+            )}
           </tfoot>
         </table>
-        <p className="page-number">Page {pageIndex}</p>
-        <div className="page-break"></div>
-        {/* Second half of the columns */}
+        {pageIndex % 20 == 0 && (
+          <div>
+            <p className="page-number">Page {pageIndex / 20}</p>
+            <div className="page-break"></div>
+          </div>
+        )}
+        {pageIndex == Object.keys(props.data).length && pageIndex % 20 != 0 && (
+          <p className="page-number">Page 1</p>
+        )}
+      </div>
+    ))}
+    <div className="page-break"></div>
+    {/* second half of columns */}
+    {Object.keys(props.data).map((pageIndex) => (
+      <div key={pageIndex}>
+        {/* First half of the columns */}
         <table className="table">
-          <thead>
-            <tr>
-              <th>Sc. Breakage Fund</th>
-              <th>Magazine Fund</th>
-              <th>Library Sec Fund</th>
-              <th>Board/Univ Regd/Exam Fund</th>
-              <th>Sports Fund</th>
-              <th>Miscellaneous Fund</th>
-              <th>Board Uni Processing Fee</th>
-              <th>Transport Fund</th>
-              <th>Burqa Fund</th>
-              <th>College Examination Fund</th>
-              <th>Computer Fund</th>
-              <th>2nd Shift Fund</th>
-              <th>Fine Funds</th>
-              <th>Total Fee</th>
-              <th>Grand Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {props.data[pageIndex].data.map((challan, index) => (
-              <tr key={index}>
-                <td>{challan.scBreakageFund}</td>
-                <td>{challan.magazineFund}</td>
-                <td>{challan.librarySecFund}</td>
-                <td>{challan.boardUnivRegExamDues}</td>
-                <td>{challan.sportsFund}</td>
-                <td>{challan.miscellaneousFund}</td>
-                <td>{challan.boardUniProcessingFee}</td>
-                <td>{challan.transportFund}</td>
-                <td>{challan.burqaFund}</td>
-                <td>{challan.collegeExaminationFund}</td>
-                <td>{challan.computerFee}</td>
-                <td>{challan.secondShift}</td>
-                <td>{challan.fineFunds}</td>
-                <td>
-                  {(challan.generalFund || 0) +
-                    (challan.studentIdCardFund || 0) +
-                    (challan.redCrossFund || 0) +
-                    (challan.medicalFee || 0) +
-                    (challan.studentWelfareFund || 0) +
-                    (challan.scBreakageFund || 0) +
-                    (challan.magazineFund || 0) +
-                    (challan.librarySecFund || 0) +
-                    (challan.boardUnivRegExamDues || 0) +
-                    (challan.sportsFund || 0) +
-                    (challan.miscellaneousFund || 0) +
-                    (challan.boardUniProcessingFee || 0) +
-                    (challan.transportFund || 0) +
-                    (challan.burqaFund || 0) +
-                    (challan.collegeExaminationFund || 0) +
-                    (challan.computerFee || 0) +
-                    (challan.secondShift || 0) +
-                    (challan.fineFunds || 0)}
-                </td>
-                <td>
-                  {(challan.admissionFee || 0) +
-                    (challan.tuitionFee || 0) +
-                    (challan.generalFund || 0) +
-                    (challan.studentIdCardFund || 0) +
-                    (challan.redCrossFund || 0) +
-                    (challan.medicalFee || 0) +
-                    (challan.studentWelfareFund || 0) +
-                    (challan.scBreakageFund || 0) +
-                    (challan.magazineFund || 0) +
-                    (challan.librarySecFund || 0) +
-                    (challan.boardUnivRegExamDues || 0) +
-                    (challan.sportsFund || 0) +
-                    (challan.miscellaneousFund || 0) +
-                    (challan.boardUniProcessingFee || 0) +
-                    (challan.transportFund || 0) +
-                    (challan.burqaFund || 0) +
-                    (challan.collegeExaminationFund || 0) +
-                    (challan.computerFee || 0) +
-                    (challan.secondShift || 0) +
-                    (challan.fineFunds || 0)}
-                </td>
+          {(pageIndex == 1 || pageIndex % 21 == 0) && (
+            <thead>
+              <tr>
+                <th>Board/Univ Regd/Exam Fund</th>
+                <th>Sports Fund</th>
+                <th>Miscellaneous Fund</th>
+                <th>Board Uni Processing Fee</th>
+                <th>Transport Fund</th>
+                <th>Burqa Fund</th>
+                <th>College Examination Fund</th>
+                <th>Computer Fund</th>
+                <th>2nd Shift Fund</th>
+                <th>Fine Funds</th>
+                <th>Fund Total</th>
+                <th>Grand Total</th>
               </tr>
-            ))}
-          </tbody>
-          <tfoot>
+            </thead>
+          )}
+          <tbody>
             <tr>
-              <td>{props.data[pageIndex].sum.scBreakageFund}</td>
-              <td>{props.data[pageIndex].sum.magazineFund}</td>
-              <td>{props.data[pageIndex].sum.librarySecFund}</td>
               <td>{props.data[pageIndex].sum.boardUnivRegExamDues}</td>
               <td>{props.data[pageIndex].sum.sportsFund}</td>
               <td>{props.data[pageIndex].sum.miscellaneousFund}</td>
@@ -239,12 +158,10 @@ const ReportTable = React.forwardRef((props, ref) => (
                   (props.data[pageIndex].sum.fineFunds || 0)}
               </td>
             </tr>
-
-            {Object.keys(props.data).length == pageIndex ? (
+          </tbody>
+          <tfoot>
+            {Object.keys(props.data).length == pageIndex && (
               <tr>
-                <td>{props.sum.scBreakageFund}</td>
-                <td>{props.sum.magazineFund}</td>
-                <td>{props.sum.librarySecFund}</td>
                 <td>{props.sum.boardUnivRegExamDues}</td>
                 <td>{props.sum.sportsFund}</td>
                 <td>{props.sum.miscellaneousFund}</td>
@@ -298,17 +215,22 @@ const ReportTable = React.forwardRef((props, ref) => (
                     (props.sum.fineFunds || 0)}
                 </td>
               </tr>
-            ) : null}
+            )}
           </tfoot>
         </table>
 
-        <p className="page-number">Page {pageIndex}</p>
-
-        {/* CSS to force page break after each table set */}
-        <div className="page-break"></div>
+        {pageIndex % 20 == 0 && (
+          <div>
+            <p className="page-number">Page {pageIndex / 20}</p>
+            <div className="page-break"></div>
+          </div>
+        )}
+        {pageIndex == Object.keys(props.data).length && pageIndex % 20 != 0 && (
+          <p className="page-number">Page 1</p>
+        )}
       </div>
     ))}
   </div>
 ));
 
-export default ReportTable;
+export default ClassifiedCashBook;

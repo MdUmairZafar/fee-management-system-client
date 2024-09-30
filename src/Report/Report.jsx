@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import "./report.css"; // Import the CSS file for styling
 import axiosInstance, { isTokenSet } from "../Utils/axiosConfig";
 import PrintReport from "./ReportPrint/printReport";
+import PrintCCB from "./ReportPrint/generateCCB";
 
 const Report = () => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -34,7 +35,11 @@ const Report = () => {
         const queryParam =
           searchType === "name"
             ? `studentName=${nameQuery}`
-            : `challanNo=${nameQuery}`;
+            : searchType === "challanNo"
+            ? `challanNo=${nameQuery}`
+            : searchType === "rollNo"
+            ? `rollNo=${nameQuery}`
+            : "";
         const dateRangeParam =
           date1 || date2 ? `&startDate=${startDate}&endDate=${endDate}` : "";
         const [response, sumResponse] = await Promise.all([
@@ -178,6 +183,7 @@ const Report = () => {
             >
               <option value="name">Name</option>
               <option value="challanNo">Challan No</option>
+              <option value="rollNo">Roll No</option>
             </select>
             <input
               type="search"
@@ -192,6 +198,12 @@ const Report = () => {
           </div>
           <div className="top-buttons">
             <PrintReport
+              startDate={
+                date1 || new Date("1900-01-01").toISOString().split("T")[0]
+              }
+              endDate={date2 || new Date().toISOString().split("T")[0]}
+            />
+            <PrintCCB
               startDate={
                 date1 || new Date("1900-01-01").toISOString().split("T")[0]
               }

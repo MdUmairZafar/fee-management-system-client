@@ -40,7 +40,11 @@ const Challan = () => {
         const queryParam =
           searchType === "name"
             ? `studentName=${nameQuery}`
-            : `challanNo=${nameQuery}`;
+            : searchType === "challanNo"
+            ? `challanNo=${nameQuery}`
+            : searchType === "rollNo"
+            ? `rollNo=${nameQuery}`
+            : "";
         const dateRangeParam =
           date1 || date2 ? `&startDate=${startDate}&endDate=${endDate}` : "";
         const response = await axiosInstance.get(
@@ -228,6 +232,7 @@ const Challan = () => {
             >
               <option value="name">Name</option>
               <option value="challanNo">Challan No</option>
+              <option value="rollNo">Roll No</option>
             </select>
             <button onClick={deleteChallan} className="delete-button">
               delete
