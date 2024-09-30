@@ -12,6 +12,7 @@
 
   table {
     width: 100%;
+    table-layout: fixed;
     font-size: 10pt; /* Adjust font size if needed */
     border-collapse: collapse; /* Ensure borders are collapsed */
   }
@@ -24,8 +25,8 @@
 
   th,
   td {
-    padding: 8px;
-
+    width: 75px;
+    text-wrap: wrap;
     border: 1px solid black; /* Optional: adds border to table */
     text-align: left; /* Align text to the left */
   }
@@ -33,7 +34,7 @@
     font-weight: bold;
   }
   th {
-    height: 50px; /* Adjust height if needed */
+    height: 50px;
   }
 
   .print-heading {
