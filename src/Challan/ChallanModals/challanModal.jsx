@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Box, Button, Modal, TextField, Grid } from "@mui/material";
+import {
+  Box,
+  Button,
+  Modal,
+  TextField,
+  Grid,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
+} from "@mui/material";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import "../challan.css";
@@ -360,8 +370,34 @@ const ChallanModal = ({
             validationSchema={validationSchema}
             onSubmit={onSubmit}
           >
-            {({ errors, touched, values }) => (
+            {({ errors, touched, values, handleChange }) => (
               <Form>
+                <FormControl
+                  fullWidth
+                  margin="normal"
+                  variant="outlined"
+                  size="small"
+                >
+                  <InputLabel>Challan Type</InputLabel>
+                  <Select
+                    name="type"
+                    value={values.type}
+                    onChange={handleChange}
+                    error={touched.type && !!errors.type}
+                    label="Type"
+                  >
+                    <MenuItem value="addmission">Admission</MenuItem>
+                    <MenuItem value="fine">Fine</MenuItem>
+                    <MenuItem value="readdmission">Re Addmission</MenuItem>
+                    <MenuItem value="secondshift">2nd Shift</MenuItem>
+                    <MenuItem value="instalment">Installment</MenuItem>
+                  </Select>
+                  <ErrorMessage
+                    name="type"
+                    component="div"
+                    style={{ color: "red", fontSize: "12px" }}
+                  />
+                </FormControl>
                 <Grid container spacing={2}>
                   <Grid item xs={4}>
                     <Field
@@ -407,20 +443,34 @@ const ChallanModal = ({
                       helperText={<ErrorMessage name="fatherName" />}
                     />
 
-                    <Field
-                      as={TextField}
-                      label="Class"
-                      name="grade"
+                    <FormControl
                       fullWidth
-                      InputLabelProps={{
-                        shrink: values.grade,
-                      }}
                       margin="normal"
-                      size="small"
                       variant="outlined"
-                      error={touched.grade && !!errors.grade}
-                      helperText={<ErrorMessage name="grade" />}
-                    />
+                      size="small"
+                    >
+                      <InputLabel>Class</InputLabel>
+                      <Select
+                        name="grade"
+                        value={values.type}
+                        onChange={handleChange}
+                        error={touched.grade && !!errors.grade}
+                        label="Class"
+                      >
+                        <MenuItem value="Pre Med">Pre Med</MenuItem>
+                        <MenuItem value="Pre Eng">Pre Eng</MenuItem>
+                        <MenuItem value="ICS Physics">ICS Physics</MenuItem>
+                        <MenuItem value="ICS Stats">ICS Stats</MenuItem>
+                        <MenuItem value="ICS Economics">ICS Economics</MenuItem>
+                        <MenuItem value="ICOM">ICOM</MenuItem>
+                        <MenuItem value="IES">IES</MenuItem>
+                      </Select>
+                      <ErrorMessage
+                        name="grade"
+                        component="div"
+                        style={{ color: "red", fontSize: "12px" }}
+                      />
+                    </FormControl>
                     <Field
                       as={TextField}
                       label="Admission Fee"

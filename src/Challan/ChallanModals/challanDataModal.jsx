@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, Modal, TextField, Grid } from "@mui/material";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import {
+  Box,
+  Button,
+  Modal,
+  TextField,
+  Grid,
+  FormControl,
+  MenuItem,
+  InputLabel,
+  Select,
+} from "@mui/material";
+import { Formik, Form, Field, ErrorMessage, useFormikContext } from "formik";
 import * as Yup from "yup";
 import "../challan.css";
 import axiosInstance from "../../Utils/axiosConfig";
@@ -20,6 +30,8 @@ const style = {
 };
 
 const validationSchema = Yup.object().shape({
+  challanType: Yup.string().required("Challan Type is required"),
+  grade: Yup.string().required("Grade is required"),
   admissionFee: Yup.number()
     .typeError("Admission Fee must be a number")
     .min(0, "Admission Fee must be a positive number")
@@ -27,7 +39,7 @@ const validationSchema = Yup.object().shape({
   tuitionFee: Yup.number()
     .typeError("Tuition Fee must be a number")
     .min(0, "Tuition Fee must be a positive number")
-    .required("Tuition Fee is required"),
+    .nullable(),
   generalFund: Yup.number()
     .typeError("General Fund must be a number")
     .min(0, "General Fund must be a positive number")
@@ -102,20 +114,72 @@ const validationSchema = Yup.object().shape({
     .nullable(),
 });
 
+// handles logic for fetching data on dropdown change
+const FetchOnDropdownChange = ({ setInitialValues }) => {
+  const { values } = useFormikContext();
+  console.log("Values in FetchOnDropdownChange:", values);
+
+  useEffect(() => {
+    const fetchData = async (challanType, grade) => {
+      try {
+        console.log("In try");
+        const response = await axiosInstance.get("/challan/data", {
+          params: { challanType, grade },
+        });
+        const data = {
+          challanType: values.challanType,
+          grade: values.grade,
+          ...response.data.data,
+        };
+        console.log("Data ....:", data);
+        setInitialValues(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        // have to set all to empty because user may have value in any of the fields
+        setInitialValues({
+          challanType: values.challanType,
+          grade: values.grade,
+          admissionFee: "",
+          tuitionFee: "",
+          generalFund: "",
+          studentIdCardFund: "",
+          redCrossFund: "",
+          medicalFund: "",
+          studentWelfareFund: "",
+          scBreakageFund: "",
+          magazineFund: "",
+          librarySecurityFund: "",
+          boardUniRegdExamDues: "",
+          sportsFund: "",
+          miscellaneousFund: "",
+          boardUniProcessingFee: "",
+          transportFund: "",
+          burqaFund: "",
+          collegeExaminationFund: "",
+          computerFee: "",
+          secondShiftFee: "",
+          fineFund: "",
+        });
+      }
+    };
+
+    if (values.challanType && values.grade) {
+      console.log("Fetching data for:", values.challanType, values.grade);
+      fetchData(values.challanType, values.grade);
+    }
+  }, [values.challanType, values.grade]);
+
+  return null; // This component only handles fetching, no UI needed
+};
+
 const ChallanDataModal = ({ buttonName, isDisable }) => {
   const [open, setOpen] = useState(false);
   const [initialValues, setInitialValues] = useState({});
 
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
-  const getInitialValues = async () => {
-    try {
-      const response = await axiosInstance.get("/challan/data");
-      setInitialValues(response.data.data);
-    } catch (err) {
-      console.log(err);
-    }
+  const handleClose = () => {
+    setInitialValues({}); // Reset the form values
+    setOpen(false);
   };
 
   const updateValues = async (values) => {
@@ -127,19 +191,14 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
     }
   };
 
-  useEffect(() => {
-    getInitialValues();
-  }, []);
-
   // update values in backend file
   const onSubmit = async (values) => {
     console.log("Form Data Submitted:", values);
     await updateValues(values);
-    // seems like a good option reduces the number of API calls
-    setInitialValues(values);
+    setInitialValues({});
+    alert("Values Updated Successfully");
     handleClose();
   };
-
   return (
     <div>
       <button
@@ -154,12 +213,64 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
+            enableReinitialize={true}
             onSubmit={onSubmit}
           >
-            {({ errors, touched }) => (
+            {({ errors, touched, values, handleChange }) => (
               <Form>
+                <FetchOnDropdownChange setInitialValues={setInitialValues} />
+                {/* to fetch data after values of class and challan are selected */}
+                <FormControl
+                  fullWidth
+                  margin="normal"
+                  variant="outlined"
+                  size="small"
+                >
+                  <InputLabel>Challan Type</InputLabel>
+                  <Select
+                    name="challanType"
+                    value={values.challanType}
+                    onChange={handleChange}
+                    error={touched.challanType && !!errors.challanType}
+                    label="Challan Type"
+                  >
+                    <MenuItem value="addmission">Admission</MenuItem>
+                    <MenuItem value="fine">Fine</MenuItem>
+                    <MenuItem value="readdmission">Re Addmission</MenuItem>
+                    <MenuItem value="secondshift">2nd Shift</MenuItem>
+                  </Select>
+                  <ErrorMessage
+                    name="challanType"
+                    component="div"
+                    style={{ color: "red", fontSize: "12px" }}
+                  />
+                </FormControl>
                 <Grid container spacing={2}>
                   <Grid item xs={4}>
+                    <FormControl
+                      fullWidth
+                      size="small"
+                      margin="normal"
+                      variant="outlined"
+                    >
+                      <InputLabel>Class</InputLabel>
+                      <Select
+                        name="grade"
+                        value={values.grade}
+                        onChange={handleChange}
+                        error={touched.grade && !!errors.grade}
+                        label="Class"
+                      >
+                        <MenuItem value="Pre Med">Pre Med</MenuItem>
+                        <MenuItem value="Pre Eng">Pre Eng</MenuItem>
+                        <MenuItem value="Others">Other</MenuItem>
+                      </Select>
+                      <ErrorMessage
+                        name="grade"
+                        component="div"
+                        style={{ color: "red", fontSize: "12px" }}
+                      />
+                    </FormControl>
                     <Field
                       as={TextField}
                       label="Admission Fee"
@@ -168,6 +279,9 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       size="small"
                       margin="normal"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.admissionFee ? true : false, // Shrinks only if there's a value
+                      }}
                       error={touched.admissionFee && !!errors.admissionFee}
                       helperText={<ErrorMessage name="admissionFee" />}
                     />
@@ -179,6 +293,9 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       margin="normal"
                       size="small"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.tuitionFee ? true : false, // Shrinks only if there's a value
+                      }}
                       error={touched.tuitionFee && !!errors.tuitionFee}
                       helperText={<ErrorMessage name="tuitionFee" />}
                     />
@@ -190,6 +307,9 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       margin="normal"
                       variant="outlined"
                       size="small"
+                      InputLabelProps={{
+                        shrink: values.generalFund ? true : false, // Shrinks only if there's a value
+                      }}
                       error={touched.generalFund && !!errors.generalFund}
                       helperText={<ErrorMessage name="generalFund" />}
                     />
@@ -201,6 +321,9 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       size="small"
                       margin="normal"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.studentIdCardFund ? true : false, // Shrinks only if there's a value
+                      }}
                       error={
                         touched.studentIdCardFund && !!errors.studentIdCardFund
                       }
@@ -214,6 +337,9 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       size="small"
                       margin="normal"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.redCrossFund ? true : false, // Shrinks only if there's a value
+                      }}
                       error={touched.redCrossFund && !!errors.redCrossFund}
                       helperText={<ErrorMessage name="redCrossFund" />}
                     />
@@ -225,6 +351,9 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       size="small"
                       margin="normal"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.medicalFund ? true : false, // Shrinks only if there's a value
+                      }}
                       error={touched.medicalFund && !!errors.medicalFund}
                       helperText={<ErrorMessage name="medicalFund" />}
                     />
@@ -236,6 +365,9 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       size="small"
                       margin="normal"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.studentWelfareFund ? true : false, // Shrinks only if there's a value
+                      }}
                       error={
                         touched.studentWelfareFund &&
                         !!errors.studentWelfareFund
@@ -253,6 +385,9 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       size="small"
                       margin="normal"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.scBreakageFund ? true : false, // Shrinks only if there's a value
+                      }}
                       error={touched.scBreakageFund && !!errors.scBreakageFund}
                       helperText={<ErrorMessage name="scBreakageFund" />}
                     />
@@ -264,6 +399,9 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       size="small"
                       margin="normal"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.magazineFund ? true : false, // Shrinks only if there's a value
+                      }}
                       error={touched.magzineFund && !!errors.magzineFund}
                       helperText={<ErrorMessage name="magzineFund" />}
                     />
@@ -275,6 +413,9 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       size="small"
                       margin="normal"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.librarySecurityFund ? true : false, // Shrinks only if there's a value
+                      }}
                       error={
                         touched.librarySecurityFund &&
                         !!errors.librarySecurityFund
@@ -289,6 +430,9 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       size="small"
                       margin="normal"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.boardUniRegdExamDues ? true : false, // Shrinks only if there's a value
+                      }}
                       error={
                         touched.boardUniRegdExamDues &&
                         !!errors.boardUniRegdExamDues
@@ -303,6 +447,9 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       size="small"
                       margin="normal"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.sportsFund ? true : false, // Shrinks only if there's a value
+                      }}
                       error={touched.sportsFund && !!errors.sportsFund}
                       helperText={<ErrorMessage name="sportsFund" />}
                     />
@@ -314,6 +461,9 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       size="small"
                       margin="normal"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.miscellaneousFund ? true : false, // Shrinks only if there's a value
+                      }}
                       error={
                         touched.miscellaneousFund && !!errors.miscellaneousFund
                       }
@@ -327,15 +477,15 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       size="small"
                       margin="normal"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.boardUniProcessingFee ? true : false, // Shrinks only if there's a value
+                      }}
                       error={
                         touched.boardUniProcessingFee &&
                         !!errors.boardUniProcessingFee
                       }
                       helperText={<ErrorMessage name="boardUniProcessingFee" />}
                     />
-                  </Grid>
-
-                  <Grid item xs={4}>
                     <Field
                       as={TextField}
                       label="Transport Fund: BTA 4017-7"
@@ -344,9 +494,15 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       size="small"
                       margin="normal"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.transportFund ? true : false, // Shrinks only if there's a value
+                      }}
                       error={touched.transportFund && !!errors.transportFund}
                       helperText={<ErrorMessage name="transportFund" />}
                     />
+                  </Grid>
+
+                  <Grid item xs={4}>
                     <Field
                       as={TextField}
                       label="Burqa Fund: BTA 4019-1"
@@ -355,6 +511,9 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       size="small"
                       margin="normal"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.burqaFund ? true : false, // Shrinks only if there's a value
+                      }}
                       error={touched.burqaFund && !!errors.burqaFund}
                       helperText={<ErrorMessage name="burqaFund" />}
                     />
@@ -366,6 +525,9 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       size="small"
                       margin="normal"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.collegeExaminationFund ? true : false, // Shrinks only if there's a value
+                      }}
                       error={
                         touched.collegeExaminationFund &&
                         !!errors.collegeExaminationFund
@@ -382,6 +544,9 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       size="small"
                       margin="normal"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.computerFee ? true : false, // Shrinks only if there's a value
+                      }}
                       error={touched.computerFee && !!errors.computerFee}
                       helperText={<ErrorMessage name="computerFee" />}
                     />
@@ -393,6 +558,9 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       size="small"
                       margin="normal"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.secondShiftFee ? true : false, // Shrinks only if there's a value
+                      }}
                       error={touched.secondShiftFee && !!errors.secondShiftFee}
                       helperText={<ErrorMessage name="secondShiftFee" />}
                     />
@@ -404,6 +572,9 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
                       size="small"
                       margin="normal"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.fineFund ? true : false, // Shrinks only if there's a value
+                      }}
                       error={touched.fineFund && !!errors.fineFund}
                       helperText={<ErrorMessage name="fineFund" />}
                     />
