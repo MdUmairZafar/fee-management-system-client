@@ -78,12 +78,27 @@ const useFetchAllPages = (startDate = null, endDate = null) => {
       // Fetch first page and determine total pages (capped at 25)
       const firstPageResponse = await axiosInstance.get(baseUrl);
       const totalPages = Math.min(firstPageResponse.data.totalPages, 25);
-      let dataByPages = {
-        1: {
-          data: firstPageResponse.data.data,
-          sum: calculatePageTotals(firstPageResponse.data.data), // Sum for the first page
-        },
+      let dataByPages = {};
+
+      const groupDataByDate = (pageData) => {
+        const groupedData = {};
+        pageData.forEach((item) => {
+          const date = new Date(item.createdAt).toLocaleDateString(); // Extract date from createdAt
+          if (!groupedData[date]) {
+            groupedData[date] = { data: [], sum: 0 };
+          }
+          groupedData[date].data.push(item);
+        });
+        // Now calculate totals for each date group
+        Object.keys(groupedData).forEach((date) => {
+          groupedData[date].sum = calculatePageTotals(groupedData[date].data); // Pass array of records
+        });
+
+        return groupedData;
       };
+
+      // Process first page
+      dataByPages[1] = groupDataByDate(firstPageResponse.data.data);
 
       // Fetch remaining pages up to the limit of 25 pages
       for (let page = 2; page <= totalPages; page++) {
@@ -96,12 +111,8 @@ const useFetchAllPages = (startDate = null, endDate = null) => {
         }
 
         const response = await axiosInstance.get(url);
-        dataByPages[page] = {
-          data: response.data.data,
-          sum: calculatePageTotals(response.data.data), // Calculate and store sum for each page
-        };
+        dataByPages[page] = groupDataByDate(response.data.data);
       }
-
       setAllData(dataByPages);
     } catch (err) {
       console.error("Error fetching all data:", err);

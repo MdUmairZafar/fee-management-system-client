@@ -27,24 +27,26 @@ const ClassifiedCashBook = React.forwardRef((props, ref) => (
             </thead>
           )}
           <tbody>
-            <tr>
-              <td>{pageIndex}</td>
-              <td>date</td>
-              <td>{props.data[pageIndex].sum.admissionFee}</td>
-              <td>{props.data[pageIndex].sum.tuitionFee}</td>
-              <td>
-                {(props.data[pageIndex].sum.admissionFee || 0) +
-                  (props.data[pageIndex].sum.tuitionFee || 0)}
-              </td>
-              <td>{props.data[pageIndex].sum.generalFund}</td>
-              <td>{props.data[pageIndex].sum.studentIdCardFund}</td>
-              <td>{props.data[pageIndex].sum.redCrossFund}</td>
-              <td>{props.data[pageIndex].sum.medicalFee}</td>
-              <td>{props.data[pageIndex].sum.studentWelfareFund}</td>
-              <td>{props.data[pageIndex].sum.scBreakageFund}</td>
-              <td>{props.data[pageIndex].sum.magazineFund}</td>
-              <td>{props.data[pageIndex].sum.librarySecFund}</td>
-            </tr>
+            {Object.keys(props.data[pageIndex]).map((date, index) => (
+              <tr key={index}>
+                <td>{pageIndex}</td>
+                <td>{date}</td>
+                <td>{props.data[pageIndex][date].sum.admissionFee}</td>
+                <td>{props.data[pageIndex][date].sum.tuitionFee}</td>
+                <td>
+                  {(props.data[pageIndex][date].sum.admissionFee || 0) +
+                    (props.data[pageIndex][date].sum.tuitionFee || 0)}
+                </td>
+                <td>{props.data[pageIndex][date].sum.generalFund}</td>
+                <td>{props.data[pageIndex][date].sum.studentIdCardFund}</td>
+                <td>{props.data[pageIndex][date].sum.redCrossFund}</td>
+                <td>{props.data[pageIndex][date].sum.medicalFee}</td>
+                <td>{props.data[pageIndex][date].sum.studentWelfareFund}</td>
+                <td>{props.data[pageIndex][date].sum.scBreakageFund}</td>
+                <td>{props.data[pageIndex][date].sum.magazineFund}</td>
+                <td>{props.data[pageIndex][date].sum.librarySecFund}</td>
+              </tr>
+            ))}
           </tbody>
           <tfoot>
             {Object.keys(props.data).length == pageIndex && (
@@ -104,60 +106,70 @@ const ClassifiedCashBook = React.forwardRef((props, ref) => (
             </thead>
           )}
           <tbody>
-            <tr>
-              <td>{props.data[pageIndex].sum.boardUnivRegExamDues}</td>
-              <td>{props.data[pageIndex].sum.sportsFund}</td>
-              <td>{props.data[pageIndex].sum.miscellaneousFund}</td>
-              <td>{props.data[pageIndex].sum.boardUniProcessingFee}</td>
-              <td>{props.data[pageIndex].sum.transportFund}</td>
-              <td>{props.data[pageIndex].sum.burqaFund}</td>
-              <td>{props.data[pageIndex].sum.collegeExaminationFund}</td>
-              <td>{props.data[pageIndex].sum.computerFee}</td>
-              <td>{props.data[pageIndex].sum.secondShift}</td>
-              <td>{props.data[pageIndex].sum.fineFunds}</td>
-              <td>
-                {(props.data[pageIndex].sum.generalFund || 0) +
-                  (props.data[pageIndex].sum.studentIdCardFund || 0) +
-                  (props.data[pageIndex].sum.redCrossFund || 0) +
-                  (props.data[pageIndex].sum.medicalFee || 0) +
-                  (props.data[pageIndex].sum.studentWelfareFund || 0) +
-                  (props.data[pageIndex].sum.scBreakageFund || 0) +
-                  (props.data[pageIndex].sum.magazineFund || 0) +
-                  (props.data[pageIndex].sum.librarySecFund || 0) +
-                  (props.data[pageIndex].sum.boardUnivRegExamDues || 0) +
-                  (props.data[pageIndex].sum.sportsFund || 0) +
-                  (props.data[pageIndex].sum.miscellaneousFund || 0) +
-                  (props.data[pageIndex].sum.boardUniProcessingFee || 0) +
-                  (props.data[pageIndex].sum.transportFund || 0) +
-                  (props.data[pageIndex].sum.burqaFund || 0) +
-                  (props.data[pageIndex].sum.collegeExaminationFund || 0) +
-                  (props.data[pageIndex].sum.computerFee || 0) +
-                  (props.data[pageIndex].sum.secondShift || 0) +
-                  (props.data[pageIndex].sum.fineFunds || 0)}
-              </td>
-              <td>
-                {(props.data[pageIndex].sum.admissionFee || 0) +
-                  (props.data[pageIndex].sum.tuitionFee || 0) +
-                  (props.data[pageIndex].sum.generalFund || 0) +
-                  (props.data[pageIndex].sum.studentIdCardFund || 0) +
-                  (props.data[pageIndex].sum.redCrossFund || 0) +
-                  (props.data[pageIndex].sum.medicalFee || 0) +
-                  (props.data[pageIndex].sum.studentWelfareFund || 0) +
-                  (props.data[pageIndex].sum.scBreakageFund || 0) +
-                  (props.data[pageIndex].sum.magazineFund || 0) +
-                  (props.data[pageIndex].sum.librarySecFund || 0) +
-                  (props.data[pageIndex].sum.boardUnivRegExamDues || 0) +
-                  (props.data[pageIndex].sum.sportsFund || 0) +
-                  (props.data[pageIndex].sum.miscellaneousFund || 0) +
-                  (props.data[pageIndex].sum.boardUniProcessingFee || 0) +
-                  (props.data[pageIndex].sum.transportFund || 0) +
-                  (props.data[pageIndex].sum.burqaFund || 0) +
-                  (props.data[pageIndex].sum.collegeExaminationFund || 0) +
-                  (props.data[pageIndex].sum.computerFee || 0) +
-                  (props.data[pageIndex].sum.secondShift || 0) +
-                  (props.data[pageIndex].sum.fineFunds || 0)}
-              </td>
-            </tr>
+            {Object.keys(props.data[pageIndex]).map((date, index) => (
+              <tr key={index}>
+                <td>{props.data[pageIndex][date].sum.boardUnivRegExamDues}</td>
+                <td>{props.data[pageIndex][date].sum.sportsFund}</td>
+                <td>{props.data[pageIndex][date].sum.miscellaneousFund}</td>
+                <td>{props.data[pageIndex][date].sum.boardUniProcessingFee}</td>
+                <td>{props.data[pageIndex][date].sum.transportFund}</td>
+                <td>{props.data[pageIndex][date].sum.burqaFund}</td>
+                <td>
+                  {props.data[pageIndex][date].sum.collegeExaminationFund}
+                </td>
+                <td>{props.data[pageIndex][date].sum.computerFee}</td>
+                <td>{props.data[pageIndex][date].sum.secondShift}</td>
+                <td>{props.data[pageIndex][date].sum.fineFunds}</td>
+                <td>
+                  {(props.data[pageIndex][date].sum.generalFund || 0) +
+                    (props.data[pageIndex][date].sum.studentIdCardFund || 0) +
+                    (props.data[pageIndex][date].sum.redCrossFund || 0) +
+                    (props.data[pageIndex][date].sum.medicalFee || 0) +
+                    (props.data[pageIndex][date].sum.studentWelfareFund || 0) +
+                    (props.data[pageIndex][date].sum.scBreakageFund || 0) +
+                    (props.data[pageIndex][date].sum.magazineFund || 0) +
+                    (props.data[pageIndex][date].sum.librarySecFund || 0) +
+                    (props.data[pageIndex][date].sum.boardUnivRegExamDues ||
+                      0) +
+                    (props.data[pageIndex][date].sum.sportsFund || 0) +
+                    (props.data[pageIndex][date].sum.miscellaneousFund || 0) +
+                    (props.data[pageIndex][date].sum.boardUniProcessingFee ||
+                      0) +
+                    (props.data[pageIndex][date].sum.transportFund || 0) +
+                    (props.data[pageIndex][date].sum.burqaFund || 0) +
+                    (props.data[pageIndex][date].sum.collegeExaminationFund ||
+                      0) +
+                    (props.data[pageIndex][date].sum.computerFee || 0) +
+                    (props.data[pageIndex][date].sum.secondShift || 0) +
+                    (props.data[pageIndex][date].sum.fineFunds || 0)}
+                </td>
+                <td>
+                  {(props.data[pageIndex][date].sum.admissionFee || 0) +
+                    (props.data[pageIndex][date].sum.tuitionFee || 0) +
+                    (props.data[pageIndex][date].sum.generalFund || 0) +
+                    (props.data[pageIndex][date].sum.studentIdCardFund || 0) +
+                    (props.data[pageIndex][date].sum.redCrossFund || 0) +
+                    (props.data[pageIndex][date].sum.medicalFee || 0) +
+                    (props.data[pageIndex][date].sum.studentWelfareFund || 0) +
+                    (props.data[pageIndex][date].sum.scBreakageFund || 0) +
+                    (props.data[pageIndex][date].sum.magazineFund || 0) +
+                    (props.data[pageIndex][date].sum.librarySecFund || 0) +
+                    (props.data[pageIndex][date].sum.boardUnivRegExamDues ||
+                      0) +
+                    (props.data[pageIndex][date].sum.sportsFund || 0) +
+                    (props.data[pageIndex][date].sum.miscellaneousFund || 0) +
+                    (props.data[pageIndex][date].sum.boardUniProcessingFee ||
+                      0) +
+                    (props.data[pageIndex][date].sum.transportFund || 0) +
+                    (props.data[pageIndex][date].sum.burqaFund || 0) +
+                    (props.data[pageIndex][date].sum.collegeExaminationFund ||
+                      0) +
+                    (props.data[pageIndex][date].sum.computerFee || 0) +
+                    (props.data[pageIndex][date].sum.secondShift || 0) +
+                    (props.data[pageIndex][date].sum.fineFunds || 0)}
+                </td>
+              </tr>
+            ))}
           </tbody>
           <tfoot>
             {Object.keys(props.data).length == pageIndex && (

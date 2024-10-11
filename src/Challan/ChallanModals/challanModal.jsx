@@ -10,7 +10,7 @@ import {
   MenuItem,
   InputLabel,
 } from "@mui/material";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, Field, ErrorMessage, useFormikContext } from "formik";
 import * as Yup from "yup";
 import "../challan.css";
 import axiosInstance from "../../Utils/axiosConfig";
@@ -33,6 +33,7 @@ const style = {
 };
 
 const validationSchema = Yup.object().shape({
+  challanType: Yup.string().required("Challan Type is required"),
   rollNo: Yup.string().required("Roll No. is required"),
   studentName: Yup.string().required("Student Name is required"),
   fatherName: Yup.string().required("Father Name is required"),
@@ -44,7 +45,7 @@ const validationSchema = Yup.object().shape({
   tuitionFee: Yup.number()
     .typeError("Tuition Fee must be a number")
     .min(0, "Tuition Fee must be a positive number")
-    .required("Tuition Fee is required"),
+    .nullable(),
   generalFund: Yup.number()
     .typeError("General Fund must be a number")
     .min(0, "General Fund must be a positive number")
@@ -121,6 +122,7 @@ const validationSchema = Yup.object().shape({
 
 const ChallanModal = ({
   values = {
+    challanType: "",
     rollNo: "",
     studentName: "",
     fatherName: "",
@@ -151,14 +153,6 @@ const ChallanModal = ({
   });
 
   useEffect(() => {
-    console.log("values", values);
-    if (buttonName === "Generate Challan") {
-      getInitialValues();
-    }
-    console.log("Initial Values: ", initialValues);
-  }, []);
-
-  useEffect(() => {
     // Check if valuesForPrinting has been set and is not empty
     if (valuesForPrinting && Object.keys(valuesForPrinting).length > 0) {
       console.log("Printing challan with values: ", valuesForPrinting);
@@ -166,14 +160,6 @@ const ChallanModal = ({
     }
   }, [valuesForPrinting]);
   // to get default values when generating the challan
-  const getInitialValues = async () => {
-    try {
-      const response = await axiosInstance.get("/challan/data");
-      setInitialValues(response.data.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   const getDateThreeDaysAhead = () => {
     const today = new Date();
@@ -345,6 +331,73 @@ const ChallanModal = ({
     close();
   };
 
+  // handles logic for fetching data on dropdown change
+  const FetchOnDropdownChange = ({ setInitialValues }) => {
+    const { values } = useFormikContext();
+    console.log("Values in FetchOnDropdownChange:", values);
+    let isMounted = true; // flag to check if component is mounted
+
+    useEffect(() => {
+      const fetchData = async (challanType, grade) => {
+        try {
+          console.log("In tryyyyyy");
+          const response = await axiosInstance.get("/challan/data", {
+            params: { challanType, grade },
+          });
+          const data = {
+            challanType: values.challanType,
+            grade: values.grade,
+            ...response.data.data,
+          };
+          console.log("Data ....:", data);
+          if (isMounted) setInitialValues(data);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          // have to set all to empty because user may have value in any of the fields
+          if (isMounted)
+            setInitialValues({
+              challanType: values.challanType,
+              grade: values.grade,
+              admissionFee: "",
+              tuitionFee: "",
+              generalFund: "",
+              studentIdCardFund: "",
+              redCrossFund: "",
+              medicalFund: "",
+              studentWelfareFund: "",
+              scBreakageFund: "",
+              magazineFund: "",
+              librarySecurityFund: "",
+              boardUniRegdExamDues: "",
+              sportsFund: "",
+              miscellaneousFund: "",
+              boardUniProcessingFee: "",
+              transportFund: "",
+              burqaFund: "",
+              collegeExaminationFund: "",
+              computerFee: "",
+              secondShiftFee: "",
+              fineFund: "",
+            });
+        }
+      };
+
+      if (
+        values.challanType &&
+        values.grade &&
+        values.challanType !== "instalment"
+      ) {
+        console.log("Fetching data for:", values.challanType, values.grade);
+        fetchData(values.challanType, values.grade);
+      }
+      return () => {
+        isMounted = false; // cleanup function sets mounted to false
+      };
+    }, [values.challanType, values.grade]);
+
+    return null; // This component only handles fetching, no UI needed
+  };
+
   const onSubmit = (values) => {
     if (buttonName === "Generate Challan") {
       generateChallan(values);
@@ -369,9 +422,15 @@ const ChallanModal = ({
             initialValues={initialValues}
             validationSchema={validationSchema}
             onSubmit={onSubmit}
+            enableReinitialize={true}
           >
             {({ errors, touched, values, handleChange }) => (
               <Form>
+                {buttonName === "Generate Challan" && (
+                  //to fetch data after values of class and challan are selected
+                  <FetchOnDropdownChange setInitialValues={setInitialValues} />
+                )}
+
                 <FormControl
                   fullWidth
                   margin="normal"
@@ -380,11 +439,11 @@ const ChallanModal = ({
                 >
                   <InputLabel>Challan Type</InputLabel>
                   <Select
-                    name="type"
-                    value={values.type}
+                    name="challanType"
+                    value={values.challanType}
                     onChange={handleChange}
-                    error={touched.type && !!errors.type}
-                    label="Type"
+                    error={touched.challanType && !!errors.challanType}
+                    label="Challan Type"
                   >
                     <MenuItem value="addmission">Admission</MenuItem>
                     <MenuItem value="fine">Fine</MenuItem>
@@ -393,7 +452,7 @@ const ChallanModal = ({
                     <MenuItem value="instalment">Installment</MenuItem>
                   </Select>
                   <ErrorMessage
-                    name="type"
+                    name="challanType"
                     component="div"
                     style={{ color: "red", fontSize: "12px" }}
                   />
@@ -419,7 +478,7 @@ const ChallanModal = ({
                       fullWidth
                       // needed this because of programmatically setting the value
                       InputLabelProps={{
-                        shrink: values.studentName,
+                        shrink: values.studentName ? true : false, // Shrinks only if there's a value
                       }}
                       margin="normal"
                       variant="outlined"
@@ -434,7 +493,7 @@ const ChallanModal = ({
                       name="fatherName"
                       fullWidth
                       InputLabelProps={{
-                        shrink: values.fatherName,
+                        shrink: values.fatherName ? true : false, // Shrinks only if there's a value
                       }}
                       margin="normal"
                       variant="outlined"
@@ -452,18 +511,21 @@ const ChallanModal = ({
                       <InputLabel>Class</InputLabel>
                       <Select
                         name="grade"
-                        value={values.type}
+                        value={values.grade}
                         onChange={handleChange}
                         error={touched.grade && !!errors.grade}
+                        InputLabelProps={{
+                          shrink: values.grade ? true : false, // Shrinks only if there's a value
+                        }}
                         label="Class"
                       >
                         <MenuItem value="Pre Med">Pre Med</MenuItem>
                         <MenuItem value="Pre Eng">Pre Eng</MenuItem>
-                        <MenuItem value="ICS Physics">ICS Physics</MenuItem>
-                        <MenuItem value="ICS Stats">ICS Stats</MenuItem>
-                        <MenuItem value="ICS Economics">ICS Economics</MenuItem>
-                        <MenuItem value="ICOM">ICOM</MenuItem>
-                        <MenuItem value="IES">IES</MenuItem>
+                        <MenuItem value="Others">ICS Physics</MenuItem>
+                        <MenuItem value="Others">ICS Stats</MenuItem>
+                        <MenuItem value="Others">ICS Economics</MenuItem>
+                        <MenuItem value="Others">ICOM</MenuItem>
+                        <MenuItem value="Others">IES</MenuItem>
                       </Select>
                       <ErrorMessage
                         name="grade"
@@ -478,6 +540,9 @@ const ChallanModal = ({
                       fullWidth
                       size="small"
                       inputRef={admissionFeeRef}
+                      InputLabelProps={{
+                        shrink: values.admissionFee ? true : false, // Shrinks only if there's a value
+                      }}
                       margin="normal"
                       variant="outlined"
                       error={touched.admissionFee && !!errors.admissionFee}
@@ -489,6 +554,9 @@ const ChallanModal = ({
                       name="tuitionFee"
                       fullWidth
                       margin="normal"
+                      InputLabelProps={{
+                        shrink: values.tuitionFee ? true : false, // Shrinks only if there's a value
+                      }}
                       size="small"
                       variant="outlined"
                       error={touched.tuitionFee && !!errors.tuitionFee}
@@ -500,6 +568,9 @@ const ChallanModal = ({
                       name="generalFund"
                       fullWidth
                       margin="normal"
+                      InputLabelProps={{
+                        shrink: values.generalFund ? true : false, // Shrinks only if there's a value
+                      }}
                       variant="outlined"
                       size="small"
                       error={touched.generalFund && !!errors.generalFund}
@@ -512,6 +583,9 @@ const ChallanModal = ({
                       fullWidth
                       size="small"
                       margin="normal"
+                      InputLabelProps={{
+                        shrink: values.studentIdCardFund ? true : false, // Shrinks only if there's a value
+                      }}
                       variant="outlined"
                       error={
                         touched.studentIdCardFund && !!errors.studentIdCardFund
@@ -527,6 +601,9 @@ const ChallanModal = ({
                       name="redCrossFund"
                       fullWidth
                       size="small"
+                      InputLabelProps={{
+                        shrink: values.redCrossFund ? true : false, // Shrinks only if there's a value
+                      }}
                       margin="normal"
                       variant="outlined"
                       error={touched.redCrossFund && !!errors.redCrossFund}
@@ -536,6 +613,9 @@ const ChallanModal = ({
                       as={TextField}
                       label="Medical Fund"
                       name="medicalFund"
+                      InputLabelProps={{
+                        shrink: values.medicalFund ? true : false, // Shrinks only if there's a value
+                      }}
                       fullWidth
                       size="small"
                       margin="normal"
@@ -547,6 +627,9 @@ const ChallanModal = ({
                       as={TextField}
                       label="Student Welfare Fund: PLS 900414-0"
                       name="studentWelfareFund"
+                      InputLabelProps={{
+                        shrink: values.studentWelfareFund ? true : false, // Shrinks only if there's a value
+                      }}
                       fullWidth
                       size="small"
                       margin="normal"
@@ -562,6 +645,9 @@ const ChallanModal = ({
                       label="Sc. Breakage Fund: PLS 900122-0"
                       name="scBreakageFund"
                       fullWidth
+                      InputLabelProps={{
+                        shrink: values.scBreakageFund ? true : false, // Shrinks only if there's a value
+                      }}
                       size="small"
                       margin="normal"
                       variant="outlined"
@@ -573,6 +659,9 @@ const ChallanModal = ({
                       label="Magzine Fund: PLS 900119-0"
                       name="magzineFund"
                       fullWidth
+                      InputLabelProps={{
+                        shrink: values.magzineFund ? true : false, // Shrinks only if there's a value
+                      }}
                       size="small"
                       margin="normal"
                       variant="outlined"
@@ -584,6 +673,9 @@ const ChallanModal = ({
                       label="Library Security Fund: PLS 900120-0"
                       name="librarySecurityFund"
                       fullWidth
+                      InputLabelProps={{
+                        shrink: values.librarySecurityFund ? true : false, // Shrinks only if there's a value
+                      }}
                       size="small"
                       margin="normal"
                       variant="outlined"
@@ -600,6 +692,9 @@ const ChallanModal = ({
                       fullWidth
                       size="small"
                       margin="normal"
+                      InputLabelProps={{
+                        shrink: values.boardUniRegdExamDues ? true : false, // Shrinks only if there's a value
+                      }}
                       variant="outlined"
                       error={
                         touched.boardUniRegdExamDues &&
@@ -612,6 +707,9 @@ const ChallanModal = ({
                       label="Sports Fund"
                       name="sportsFund"
                       fullWidth
+                      InputLabelProps={{
+                        shrink: values.sportsFund ? true : false, // Shrinks only if there's a value
+                      }}
                       size="small"
                       margin="normal"
                       variant="outlined"
@@ -626,6 +724,9 @@ const ChallanModal = ({
                       as={TextField}
                       label="Miscellaneous Fund"
                       name="miscellaneousFund"
+                      InputLabelProps={{
+                        shrink: values.miscellaneousFund ? true : false, // Shrinks only if there's a value
+                      }}
                       fullWidth
                       size="small"
                       margin="normal"
@@ -640,6 +741,9 @@ const ChallanModal = ({
                       label="Board University Processing Fee"
                       name="boardUniProcessingFee"
                       fullWidth
+                      InputLabelProps={{
+                        shrink: values.boardUniProcessingFee ? true : false, // Shrinks only if there's a value
+                      }}
                       size="small"
                       margin="normal"
                       variant="outlined"
@@ -656,6 +760,9 @@ const ChallanModal = ({
                       fullWidth
                       size="small"
                       margin="normal"
+                      InputLabelProps={{
+                        shrink: values.transportFund ? true : false, // Shrinks only if there's a value
+                      }}
                       variant="outlined"
                       error={touched.transportFund && !!errors.transportFund}
                       helperText={<ErrorMessage name="transportFund" />}
@@ -668,6 +775,9 @@ const ChallanModal = ({
                       size="small"
                       margin="normal"
                       variant="outlined"
+                      InputLabelProps={{
+                        shrink: values.burqaFund ? true : false, // Shrinks only if there's a value
+                      }}
                       error={touched.burqaFund && !!errors.burqaFund}
                       helperText={<ErrorMessage name="burqaFund" />}
                     />
@@ -678,6 +788,9 @@ const ChallanModal = ({
                       fullWidth
                       size="small"
                       margin="normal"
+                      InputLabelProps={{
+                        shrink: values.collegeExaminationFund ? true : false, // Shrinks only if there's a value
+                      }}
                       variant="outlined"
                       error={
                         touched.collegeExaminationFund &&
@@ -693,6 +806,9 @@ const ChallanModal = ({
                       name="computerFee"
                       fullWidth
                       size="small"
+                      InputLabelProps={{
+                        shrink: values.computerFee ? true : false, // Shrinks only if there's a value
+                      }}
                       margin="normal"
                       variant="outlined"
                       error={touched.computerFee && !!errors.computerFee}
@@ -704,6 +820,9 @@ const ChallanModal = ({
                       name="secondShiftFee"
                       fullWidth
                       size="small"
+                      InputLabelProps={{
+                        shrink: values.secondShiftFee ? true : false, // Shrinks only if there's a value
+                      }}
                       margin="normal"
                       variant="outlined"
                       error={touched.secondShiftFee && !!errors.secondShiftFee}
@@ -715,6 +834,9 @@ const ChallanModal = ({
                       name="fineFund"
                       fullWidth
                       size="small"
+                      InputLabelProps={{
+                        shrink: values.fineFund ? true : false, // Shrinks only if there's a value
+                      }}
                       margin="normal"
                       variant="outlined"
                       error={touched.fineFund && !!errors.fineFund}

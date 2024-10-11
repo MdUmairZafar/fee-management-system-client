@@ -31,7 +31,7 @@ const style = {
 
 const validationSchema = Yup.object().shape({
   challanType: Yup.string().required("Challan Type is required"),
-  grade: Yup.string().required("Grade is required"),
+  grade: Yup.string().required("Class is required"),
   admissionFee: Yup.number()
     .typeError("Admission Fee must be a number")
     .min(0, "Admission Fee must be a positive number")
@@ -174,11 +174,17 @@ const FetchOnDropdownChange = ({ setInitialValues }) => {
 
 const ChallanDataModal = ({ buttonName, isDisable }) => {
   const [open, setOpen] = useState(false);
-  const [initialValues, setInitialValues] = useState({});
+  const [initialValues, setInitialValues] = useState({
+    challanType: "",
+    grade: "",
+  });
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
-    setInitialValues({}); // Reset the form values
+    setInitialValues({
+      challanType: "",
+      grade: "",
+    }); // Reset the form values
     setOpen(false);
   };
 
@@ -186,19 +192,24 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
     try {
       const response = await axiosInstance.put("/challan/data", values);
       console.log(response);
+      setInitialValues({
+        challanType: "",
+        grade: "",
+      });
+      alert("Values Updated Successfully");
+      handleClose();
     } catch (err) {
+      alert("Error updating values");
       console.log(err);
     }
   };
 
   // update values in backend file
-  const onSubmit = async (values) => {
+  const onSubmit = (values) => {
     console.log("Form Data Submitted:", values);
-    await updateValues(values);
-    setInitialValues({});
-    alert("Values Updated Successfully");
-    handleClose();
+    updateValues(values);
   };
+
   return (
     <div>
       <button
@@ -215,6 +226,8 @@ const ChallanDataModal = ({ buttonName, isDisable }) => {
             validationSchema={validationSchema}
             enableReinitialize={true}
             onSubmit={onSubmit}
+            validateOnBlur={true}
+            validateOnChange={true}
           >
             {({ errors, touched, values, handleChange }) => (
               <Form>
