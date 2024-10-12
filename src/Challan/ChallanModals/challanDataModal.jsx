@@ -14,6 +14,7 @@ import { Formik, Form, Field, ErrorMessage, useFormikContext } from "formik";
 import * as Yup from "yup";
 import "../challan.css";
 import axiosInstance from "../../Utils/axiosConfig";
+import FetchOnDropdownChange from "./fetchOnDropDownChange";
 
 const style = {
   position: "absolute",
@@ -114,63 +115,6 @@ const validationSchema = Yup.object().shape({
     .nullable(),
 });
 
-// handles logic for fetching data on dropdown change
-const FetchOnDropdownChange = ({ setInitialValues }) => {
-  const { values } = useFormikContext();
-  console.log("Values in FetchOnDropdownChange:", values);
-
-  useEffect(() => {
-    const fetchData = async (challanType, grade) => {
-      try {
-        console.log("In try");
-        const response = await axiosInstance.get("/challan/data", {
-          params: { challanType, grade },
-        });
-        const data = {
-          challanType: values.challanType,
-          grade: values.grade,
-          ...response.data.data,
-        };
-        console.log("Data ....:", data);
-        setInitialValues(data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        // have to set all to empty because user may have value in any of the fields
-        setInitialValues({
-          challanType: values.challanType,
-          grade: values.grade,
-          admissionFee: "",
-          tuitionFee: "",
-          generalFund: "",
-          studentIdCardFund: "",
-          redCrossFund: "",
-          medicalFund: "",
-          studentWelfareFund: "",
-          scBreakageFund: "",
-          magazineFund: "",
-          librarySecurityFund: "",
-          boardUniRegdExamDues: "",
-          sportsFund: "",
-          miscellaneousFund: "",
-          boardUniProcessingFee: "",
-          transportFund: "",
-          burqaFund: "",
-          collegeExaminationFund: "",
-          computerFee: "",
-          secondShiftFee: "",
-          fineFund: "",
-        });
-      }
-    };
-
-    if (values.challanType && values.grade) {
-      console.log("Fetching data for:", values.challanType, values.grade);
-      fetchData(values.challanType, values.grade);
-    }
-  }, [values.challanType, values.grade]);
-
-  return null; // This component only handles fetching, no UI needed
-};
 
 const ChallanDataModal = ({ buttonName, isDisable }) => {
   const [open, setOpen] = useState(false);

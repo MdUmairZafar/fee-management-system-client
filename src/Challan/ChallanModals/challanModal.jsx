@@ -17,6 +17,8 @@ import axiosInstance from "../../Utils/axiosConfig";
 import { useReactToPrint } from "react-to-print";
 import ChallanComponent from "../ChallanPrint/challanPrint";
 import "../ChallanPrint/challanPrint.css";
+import FetchOnDropdownChange from "./fetchOnDropDownChange";
+
 
 const style = {
   position: "absolute",
@@ -329,73 +331,6 @@ const ChallanModal = ({
   const handleClose = () => {
     setOpen(false);
     close();
-  };
-
-  // handles logic for fetching data on dropdown change
-  const FetchOnDropdownChange = ({ setInitialValues }) => {
-    const { values } = useFormikContext();
-    console.log("Values in FetchOnDropdownChange:", values);
-    let isMounted = true; // flag to check if component is mounted
-
-    useEffect(() => {
-      const fetchData = async (challanType, grade) => {
-        try {
-          console.log("In tryyyyyy");
-          const response = await axiosInstance.get("/challan/data", {
-            params: { challanType, grade },
-          });
-          const data = {
-            challanType: values.challanType,
-            grade: values.grade,
-            ...response.data.data,
-          };
-          console.log("Data ....:", data);
-          if (isMounted) setInitialValues(data);
-        } catch (error) {
-          console.error("Error fetching data:", error);
-          // have to set all to empty because user may have value in any of the fields
-          if (isMounted)
-            setInitialValues({
-              challanType: values.challanType,
-              grade: values.grade,
-              admissionFee: "",
-              tuitionFee: "",
-              generalFund: "",
-              studentIdCardFund: "",
-              redCrossFund: "",
-              medicalFund: "",
-              studentWelfareFund: "",
-              scBreakageFund: "",
-              magazineFund: "",
-              librarySecurityFund: "",
-              boardUniRegdExamDues: "",
-              sportsFund: "",
-              miscellaneousFund: "",
-              boardUniProcessingFee: "",
-              transportFund: "",
-              burqaFund: "",
-              collegeExaminationFund: "",
-              computerFee: "",
-              secondShiftFee: "",
-              fineFund: "",
-            });
-        }
-      };
-
-      if (
-        values.challanType &&
-        values.grade &&
-        values.challanType !== "instalment"
-      ) {
-        console.log("Fetching data for:", values.challanType, values.grade);
-        fetchData(values.challanType, values.grade);
-      }
-      return () => {
-        isMounted = false; // cleanup function sets mounted to false
-      };
-    }, [values.challanType, values.grade]);
-
-    return null; // This component only handles fetching, no UI needed
   };
 
   const onSubmit = (values) => {
